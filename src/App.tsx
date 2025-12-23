@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
+import Login from './pages/Login'
 import VisaoGeral from './pages/VisaoGeral'
 import Empreendimento from './pages/Empreendimento'
 import MeuImovel from './pages/MeuImovel'
@@ -16,6 +18,7 @@ import PerguntasFrequentes from './pages/PerguntasFrequentes'
 import SobreNos from './pages/SobreNos'
 import BoletimInformativo from './pages/BoletimInformativo'
 import AssistenciaTecnica from './pages/AssistenciaTecnica'
+import Usuarios from './pages/Usuarios'
 
 type Page = 
   | 'visao-geral'
@@ -34,13 +37,20 @@ type Page =
   | 'sobre-nos'
   | 'boletim-informativo'
   | 'assistencia-tecnica'
+  | 'usuarios'
 
 function App() {
+  const { isAuthenticated } = useAuth()
   const [activePage, setActivePage] = useState<Page>('visao-geral')
 
   // Função wrapper para converter Dispatch<SetStateAction<Page>> em (page: Page) => void
   const handleSetActivePage = (page: Page) => {
     setActivePage(page)
+  }
+
+  // Se não estiver autenticado, mostrar tela de login
+  if (!isAuthenticated) {
+    return <Login />
   }
 
   const renderContent = () => {
@@ -75,6 +85,8 @@ function App() {
         return <BoletimInformativo />
       case 'assistencia-tecnica':
         return <AssistenciaTecnica />
+      case 'usuarios':
+        return <Usuarios />
       default:
         return <VisaoGeral />
     }

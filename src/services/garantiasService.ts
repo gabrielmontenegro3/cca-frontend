@@ -55,7 +55,7 @@ export const garantiasService = {
 
       console.log('➕ POST /garantias', dados);
       
-      const response = await api.post('/garantias', dados);
+      const response = await api.post('/api/garantias', dados);
       
       // ✅ Normalizar ID
       return normalizarGarantia(response.data);
@@ -91,7 +91,7 @@ export const garantiasService = {
         throw new Error('ID da garantia é obrigatório');
       }
 
-      await api.delete(`/garantias/${id}`);
+      await api.delete(`/api/garantias/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover garantia:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover garantia');

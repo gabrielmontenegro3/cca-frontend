@@ -22,7 +22,7 @@ export const preventivosService = {
         params.append('status', filtros.status);
       }
 
-      const url = `/preventivos${params.toString() ? `?${params}` : ''}`;
+      const url = `/api/preventivos${params.toString() ? `?${params}` : ''}`;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
@@ -48,7 +48,7 @@ export const preventivosService = {
   // Criar preventivo
   criar: async (dados: CriarPreventivoDTO): Promise<Preventivo> => {
     try {
-      const response = await api.post('/preventivos', dados);
+      const response = await api.post('/api/preventivos', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar preventivo:', error);
@@ -78,7 +78,7 @@ export const preventivosService = {
         throw new Error('ID do preventivo é obrigatório');
       }
 
-      await api.delete(`/preventivos/${id}`);
+      await api.delete(`/api/preventivos/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover preventivo:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover preventivo');

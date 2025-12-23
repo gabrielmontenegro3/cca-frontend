@@ -5,7 +5,7 @@ export const locaisService = {
   // Listar todos os locais
   listar: async (): Promise<Local[]> => {
     try {
-      const response = await api.get('/locais');
+      const response = await api.get('/api/locais');
       return response.data;
     } catch (error: any) {
       console.error('Erro ao listar locais:', error);
@@ -19,7 +19,7 @@ export const locaisService = {
       if (!id) {
         throw new Error('ID do local é obrigatório');
       }
-      const response = await api.get(`/locais/${id}`);
+      const response = await api.get(`/api/locais/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao buscar local:', error);
@@ -34,7 +34,7 @@ export const locaisService = {
         throw new Error('nome é obrigatório');
       }
 
-      const response = await api.post('/locais', dados);
+      const response = await api.post('/api/locais', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar local:', error);
@@ -49,7 +49,7 @@ export const locaisService = {
         throw new Error('ID do local é obrigatório');
       }
 
-      const response = await api.put(`/locais/${id}`, dados);
+      const response = await api.put(`/api/locais/${id}`, dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao atualizar local:', error);
@@ -64,7 +64,7 @@ export const locaisService = {
         throw new Error('ID do local é obrigatório');
       }
 
-      await api.delete(`/locais/${id}`);
+      await api.delete(`/api/locais/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover local:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover local');

@@ -1,3 +1,5 @@
+import { useAuth } from '../context/AuthContext'
+
 type Page = 
   | 'visao-geral'
   | 'empreendimento'
@@ -15,6 +17,7 @@ type Page =
   | 'sobre-nos'
   | 'boletim-informativo'
   | 'assistencia-tecnica'
+  | 'usuarios'
 
 interface SidebarProps {
   activePage: Page
@@ -22,11 +25,23 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activePage, setActivePage }: SidebarProps) => {
+  const { usuario, hasPermission } = useAuth()
+
   const Icon = ({ children, isActive }: { children: React.ReactNode, isActive: boolean }) => (
     <span className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400'}`}>
       {children}
     </span>
   )
+
+  const getTipoLabel = (tipo: string) => {
+    const labels: Record<string, string> = {
+      'construtora': 'Construtora',
+      'gestão tecnica': 'Gestão Técnica',
+      'morador': 'Morador',
+      'administrador': 'Administrador'
+    }
+    return labels[tipo] || tipo
+  }
 
   const menuItems = [
     { 
@@ -199,6 +214,22 @@ const Sidebar = ({ activePage, setActivePage }: SidebarProps) => {
     },
   ]
 
+  // Adicionar item de Usuários apenas para administrador (tipo 4)
+  // Este item aparece no final do menu, visível apenas para administradores
+  if (hasPermission('gerenciar_usuarios')) {
+    menuItems.push({
+      id: 'usuarios' as Page,
+      label: 'Usuários',
+      icon: (
+        <Icon isActive={activePage === 'usuarios'}>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </Icon>
+      )
+    })
+  }
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 z-40 flex flex-col border-r border-gray-800">
       {/* Logo/Título Superior */}
@@ -236,11 +267,13 @@ const Sidebar = ({ activePage, setActivePage }: SidebarProps) => {
       <div className="p-4 border-t border-gray-800 bg-gray-800/50">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center ring-2 ring-gray-700">
-            <span className="text-white text-sm font-semibold">U</span>
+            <span className="text-white text-sm font-semibold">
+              {usuario?.nome.charAt(0).toUpperCase() || 'U'}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">Usuário</p>
-            <p className="text-gray-400 text-xs truncate">Administrador</p>
+            <p className="text-white text-sm font-medium truncate">{usuario?.nome || 'Usuário'}</p>
+            <p className="text-gray-400 text-xs truncate">{usuario ? getTipoLabel(usuario.tipo) : 'Carregando...'}</p>
           </div>
         </div>
       </div>

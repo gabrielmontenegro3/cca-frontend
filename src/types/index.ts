@@ -157,17 +157,25 @@ export interface AtualizarGarantiaDTO {
 }
 
 // Tipos para Chamados
-export type TipoChamado = 'MANUTENCAO' | 'REPARO' | 'INSTALACAO' | 'OUTRO';
-export type StatusChamado = 'ABERTO' | 'EM_ANDAMENTO' | 'FINALIZADO' | 'CANCELADO';
+export type TipoChamado = 'MANUTENCAO' | 'REPARO' | 'INSTALACAO' | 'OUTRO'; // Mantido para compatibilidade
+export type StatusChamado = 'aberto' | 'em_andamento' | 'resolvido' | 'cancelado';
 export type ValidacaoGarantia = 'DENTRO_DA_GARANTIA' | 'FORA_DA_GARANTIA';
 
 export interface Chamado {
   id: number;
-  id_unidade: number;
-  id_produto: number;
-  tipo_chamado: TipoChamado;
-  descricao: string;
+  titulo: string;
+  usuario: number; // ID do usuário que criou o chamado
   status: StatusChamado;
+  descricao?: string;
+  usuario_dados?: {
+    id: number;
+    nome: string;
+    tipo: TipoUsuario;
+  };
+  // Campos legados para compatibilidade (podem ser removidos no futuro)
+  id_unidade?: number;
+  id_produto?: number;
+  tipo_chamado?: TipoChamado;
   validacao_garantia?: ValidacaoGarantia;
   data_criacao?: string;
   data_atualizacao?: string;
@@ -200,9 +208,11 @@ export interface FiltrosContatos {
 }
 
 export interface FiltrosChamados {
+  status?: StatusChamado;
+  usuario?: number; // Filtrar por ID do usuário
+  // Campos legados para compatibilidade
   id_unidade?: number;
   tipo_chamado?: TipoChamado;
-  status?: StatusChamado;
 }
 
 export interface FiltrosUnidades {
@@ -532,6 +542,32 @@ export interface CriarFornecedorProdutoDTO {
 
 export interface AtualizarFornecedorProdutoDTO {
   especificacao_tecnica?: string;
+}
+
+// Tipos para Usuários
+export type TipoUsuario = 'construtora' | 'gestão tecnica' | 'morador' | 'administrador';
+
+export interface Usuario {
+  id: number;
+  nome: string;
+  tipo: TipoUsuario;
+}
+
+export interface LoginDTO {
+  nome: string;
+  senha: string;
+}
+
+export interface CriarUsuarioDTO {
+  nome: string;
+  senha: string;
+  tipo: TipoUsuario;
+}
+
+export interface AtualizarUsuarioDTO {
+  nome?: string;
+  senha?: string;
+  tipo?: TipoUsuario;
 }
 
 

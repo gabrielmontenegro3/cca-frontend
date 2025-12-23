@@ -22,7 +22,7 @@ export const garantiasNovoService = {
         params.append('fornecedor_id', filtros.fornecedor_id.toString());
       }
 
-      const url = `/garantias-novo${params.toString() ? `?${params}` : ''}`;
+      const url = `/api/garantias-novo${params.toString() ? `?${params}` : ''}`;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
@@ -37,7 +37,7 @@ export const garantiasNovoService = {
       if (!id) {
         throw new Error('ID da garantia é obrigatório');
       }
-      const response = await api.get(`/garantias-novo/${id}`);
+      const response = await api.get(`/api/garantias-novo/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao buscar garantia:', error);
@@ -48,7 +48,7 @@ export const garantiasNovoService = {
   // Criar garantia
   criar: async (dados: CriarGarantiaNovoDTO): Promise<GarantiaNovo> => {
     try {
-      const response = await api.post('/garantias-novo', dados);
+      const response = await api.post('/api/garantias-novo', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar garantia:', error);
@@ -63,7 +63,7 @@ export const garantiasNovoService = {
         throw new Error('ID da garantia é obrigatório');
       }
 
-      const response = await api.put(`/garantias-novo/${id}`, dados);
+      const response = await api.put(`/api/garantias-novo/${id}`, dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao atualizar garantia:', error);
@@ -78,7 +78,7 @@ export const garantiasNovoService = {
         throw new Error('ID da garantia é obrigatório');
       }
 
-      await api.delete(`/garantias-novo/${id}`);
+      await api.delete(`/api/garantias-novo/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover garantia:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover garantia');

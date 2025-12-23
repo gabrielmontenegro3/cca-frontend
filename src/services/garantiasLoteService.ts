@@ -42,7 +42,7 @@ export const garantiasLoteService = {
         throw new Error('ID da garantia lote é obrigatório');
       }
       console.log('🔍 GET /garantia-lote/' + id);
-      const response = await api.get(`/garantia-lote/${id}`);
+      const response = await api.get(`/api/garantia-lote/${id}`);
       // ✅ Normalizar ID
       return normalizarGarantiaLote(response.data);
     } catch (error: any) {
@@ -60,7 +60,7 @@ export const garantiasLoteService = {
 
       console.log('➕ POST /garantia-lote', dados);
       
-      const response = await api.post('/garantia-lote', dados);
+      const response = await api.post('/api/garantia-lote', dados);
       
       // ✅ Normalizar ID
       return normalizarGarantiaLote(response.data);
@@ -82,7 +82,7 @@ export const garantiasLoteService = {
 
       console.log('🔄 PUT /garantia-lote/' + id, dadosSemRelacionados);
       
-      const response = await api.put(`/garantia-lote/${id}`, dadosSemRelacionados);
+      const response = await api.put(`/api/garantia-lote/${id}`, dadosSemRelacionados);
       
       // ✅ Normalizar ID
       return normalizarGarantiaLote(response.data);
@@ -100,7 +100,7 @@ export const garantiasLoteService = {
       }
 
       console.log('🗑️ DELETE /garantia-lote/' + id);
-      await api.delete(`/garantia-lote/${id}`);
+      await api.delete(`/api/garantia-lote/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover garantia lote:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover garantia lote');

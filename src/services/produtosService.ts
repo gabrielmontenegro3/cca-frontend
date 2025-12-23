@@ -6,7 +6,7 @@ export const produtosService = {
   // Listar todos os produtos
   listar: async (): Promise<Produto[]> => {
     try {
-      const response = await api.get('/produtos');
+      const response = await api.get('/api/produtos');
       // ✅ NORMALIZAR: Mapear id_produto para id
       return normalizarProdutos(response.data);
     } catch (error: any) {
@@ -21,7 +21,7 @@ export const produtosService = {
       if (!id) {
         throw new Error('ID do produto é obrigatório');
       }
-      const response = await api.get(`/produtos/${id}`);
+      const response = await api.get(`/api/produtos/${id}`);
       // ✅ NORMALIZAR: Mapear id_produto para id
       return normalizarProduto(response.data);
     } catch (error: any) {
@@ -44,7 +44,7 @@ export const produtosService = {
       console.log('  - ID foi removido do body?', !dadosSemRelacionados.id ? 'SIM ✅' : 'NÃO ❌')
       
       // ✅ DEVE SER POST para criar
-      const response = await api.post('/produtos', dadosSemRelacionados);
+      const response = await api.post('/api/produtos', dadosSemRelacionados);
       
       console.log('✅ POST Response:', response.data)
       // ✅ NORMALIZAR: Mapear id_produto para id
@@ -73,7 +73,7 @@ export const produtosService = {
       const { id: produtoId, id_produto: __, fornecedor: ___, ...dadosSemRelacionados } = dados as any;
       
       // ✅ CONSTRUIR URL COM ID
-      const url = `/produtos/${id}`;
+      const url = `/api/produtos/${id}`;
       
       // Debug detalhado
       console.log('🔄 PUT Request - Atualizar Produto:')
@@ -104,7 +104,7 @@ export const produtosService = {
         throw new Error('ID do produto é obrigatório');
       }
       
-      await api.delete(`/produtos/${id}`);
+      await api.delete(`/api/produtos/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover produto:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover produto');

@@ -14,7 +14,7 @@ export const produtosNovoService = {
         params.append('fornecedor_id', filtros.fornecedor_id.toString());
       }
 
-      const url = `/produtos-novo${params.toString() ? `?${params}` : ''}`;
+      const url = `/api/produtos-novo${params.toString() ? `?${params}` : ''}`;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
@@ -29,7 +29,7 @@ export const produtosNovoService = {
       if (!id) {
         throw new Error('ID do produto é obrigatório');
       }
-      const response = await api.get(`/produtos-novo/${id}`);
+      const response = await api.get(`/api/produtos-novo/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao buscar produto:', error);
@@ -44,7 +44,7 @@ export const produtosNovoService = {
         throw new Error('nome é obrigatório');
       }
 
-      const response = await api.post('/produtos-novo', dados);
+      const response = await api.post('/api/produtos-novo', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar produto:', error);
@@ -59,7 +59,7 @@ export const produtosNovoService = {
         throw new Error('ID do produto é obrigatório');
       }
 
-      const response = await api.put(`/produtos-novo/${id}`, dados);
+      const response = await api.put(`/api/produtos-novo/${id}`, dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao atualizar produto:', error);
@@ -74,7 +74,7 @@ export const produtosNovoService = {
         throw new Error('ID do produto é obrigatório');
       }
 
-      await api.delete(`/produtos-novo/${id}`);
+      await api.delete(`/api/produtos-novo/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover produto:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover produto');

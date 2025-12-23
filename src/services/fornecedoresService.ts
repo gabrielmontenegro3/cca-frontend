@@ -6,7 +6,7 @@ export const fornecedoresService = {
   // Listar todos os fornecedores
   listar: async (): Promise<Fornecedor[]> => {
     try {
-      const response = await api.get('/fornecedores');
+      const response = await api.get('/api/fornecedores');
       // ✅ Normalizar IDs
       return normalizarFornecedores(response.data);
     } catch (error: any) {
@@ -21,7 +21,7 @@ export const fornecedoresService = {
       if (!id) {
         throw new Error('ID do fornecedor é obrigatório');
       }
-      const response = await api.get(`/fornecedores/${id}`);
+      const response = await api.get(`/api/fornecedores/${id}`);
       // ✅ Normalizar ID
       return normalizarFornecedor(response.data);
     } catch (error: any) {
@@ -39,7 +39,7 @@ export const fornecedoresService = {
 
       console.log('➕ POST /fornecedores', dados);
       
-      const response = await api.post('/fornecedores', dados);
+      const response = await api.post('/api/fornecedores', dados);
       
       // ✅ Normalizar ID
       return normalizarFornecedor(response.data);
@@ -61,7 +61,7 @@ export const fornecedoresService = {
 
       console.log('🔄 PUT /fornecedores/' + id, dadosSemRelacionados);
       
-      const response = await api.put(`/fornecedores/${id}`, dadosSemRelacionados);
+      const response = await api.put(`/api/fornecedores/${id}`, dadosSemRelacionados);
       
       // ✅ Normalizar ID
       return normalizarFornecedor(response.data);
@@ -79,7 +79,7 @@ export const fornecedoresService = {
       }
 
       console.log('🗑️ DELETE /fornecedores/' + id);
-      await api.delete(`/fornecedores/${id}`);
+      await api.delete(`/api/fornecedores/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover fornecedor:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover fornecedor');

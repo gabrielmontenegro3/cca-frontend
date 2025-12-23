@@ -1,4 +1,18 @@
+import { useAuth } from '../context/AuthContext'
+
 const Navbar = () => {
+  const { usuario, logout } = useAuth()
+
+  const getTipoLabel = (tipo: string) => {
+    const labels: Record<string, string> = {
+      'construtora': 'Construtora',
+      'gestão tecnica': 'Gestão Técnica',
+      'morador': 'Morador',
+      'administrador': 'Administrador'
+    }
+    return labels[tipo] || tipo
+  }
+
   return (
     <nav className="bg-gray-900 border-b border-gray-800 fixed top-0 left-64 right-0 z-30 h-16">
       <div className="flex items-center justify-end px-6 h-full">
@@ -45,9 +59,31 @@ const Navbar = () => {
             </span>
           </button>
 
-          {/* Avatar */}
-          <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-700">
-            <span className="text-white text-sm font-semibold">U</span>
+          {/* Informações do Usuário e Logout */}
+          <div className="flex items-center space-x-3">
+            <div className="text-right">
+              <p className="text-white text-sm font-medium">{usuario?.nome}</p>
+              <p className="text-gray-400 text-xs">{usuario ? getTipoLabel(usuario.tipo) : ''}</p>
+            </div>
+            <button
+              onClick={logout}
+              className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              title="Sair"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

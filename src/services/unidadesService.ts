@@ -11,7 +11,7 @@ export const unidadesService = {
     }
     
     const queryString = params.toString();
-    const url = queryString ? `/unidades?${queryString}` : '/unidades';
+    const url = queryString ? `/api/unidades?${queryString}` : '/api/unidades';
     const response = await api.get(url);
     // ✅ NORMALIZAR: Garantir que todas as unidades tenham o campo `numero`
     return normalizarUnidades(response.data);
@@ -19,21 +19,21 @@ export const unidadesService = {
 
   // Buscar unidade por ID
   buscarPorId: async (id: number): Promise<Unidade> => {
-    const response = await api.get(`/unidades/${id}`);
+    const response = await api.get(`/api/unidades/${id}`);
     // ✅ NORMALIZAR: Garantir que a unidade tenha o campo `numero`
     return normalizarUnidade(response.data);
   },
 
   // Criar unidade
   criar: async (unidade: Omit<Unidade, 'id'>): Promise<Unidade> => {
-    const response = await api.post('/unidades', unidade);
+    const response = await api.post('/api/unidades', unidade);
     // ✅ NORMALIZAR: Garantir que a unidade retornada tenha o campo `numero`
     return normalizarUnidade(response.data);
   },
 
   // Atualizar unidade
   atualizar: async (id: number, unidade: Partial<Unidade>): Promise<Unidade> => {
-    const response = await api.put(`/unidades/${id}`, unidade);
+    const response = await api.put(`/api/unidades/${id}`, unidade);
     // ✅ NORMALIZAR: Garantir que a unidade retornada tenha o campo `numero`
     return normalizarUnidade(response.data);
   },
@@ -49,7 +49,7 @@ export const unidadesService = {
     idUnidade: number,
     dados: { id_produto: number; data_instalacao?: string }
   ): Promise<ProdutoUnidade> => {
-    const response = await api.post(`/unidades/${idUnidade}/produtos`, dados);
+    const response = await api.post(`/api/unidades/${idUnidade}/produtos`, dados);
     return response.data;
   },
 };

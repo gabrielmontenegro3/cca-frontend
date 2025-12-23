@@ -14,7 +14,7 @@ export const sistemasEdificacaoService = {
         params.append('exigencia', filtros.exigencia);
       }
 
-      const url = `/sistemas-edificacao${params.toString() ? `?${params}` : ''}`;
+      const url = `/api/sistemas-edificacao${params.toString() ? `?${params}` : ''}`;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
@@ -44,7 +44,7 @@ export const sistemasEdificacaoService = {
         throw new Error('titulo é obrigatório');
       }
 
-      const response = await api.post('/sistemas-edificacao', dados);
+      const response = await api.post('/api/sistemas-edificacao', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar sistema:', error);
@@ -74,7 +74,7 @@ export const sistemasEdificacaoService = {
         throw new Error('ID do sistema é obrigatório');
       }
 
-      await api.delete(`/sistemas-edificacao/${id}`);
+      await api.delete(`/api/sistemas-edificacao/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover sistema:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover sistema');

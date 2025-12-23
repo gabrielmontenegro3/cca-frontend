@@ -13,7 +13,7 @@ export const contatosService = {
     }
     
     const queryString = params.toString();
-    const url = queryString ? `/contatos?${queryString}` : '/contatos';
+    const url = queryString ? `/api/contatos?${queryString}` : '/api/contatos';
     const response = await api.get(url);
     return response.data;
   },
@@ -26,7 +26,7 @@ export const contatosService = {
 
   // Criar contato
   criar: async (contato: Omit<Contato, 'id'>): Promise<Contato> => {
-    const response = await api.post('/contatos', contato);
+    const response = await api.post('/api/contatos', contato);
     return response.data;
   },
 
@@ -38,7 +38,7 @@ export const contatosService = {
 
   // Remover contato
   remover: async (id: number): Promise<void> => {
-    await api.delete(`/contatos/${id}`);
+    await api.delete(`/api/contatos/${id}`);
   },
 };
 

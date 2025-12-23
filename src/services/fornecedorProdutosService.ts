@@ -37,7 +37,7 @@ export const fornecedorProdutosService = {
         throw new Error('produto_id é obrigatório');
       }
 
-      const response = await api.post('/fornecedor-produtos', dados);
+      const response = await api.post('/api/fornecedor-produtos', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar associação:', error);
@@ -73,7 +73,7 @@ export const fornecedorProdutosService = {
         throw new Error('produto_id é obrigatório');
       }
 
-      await api.delete(`/fornecedor-produtos/${fornecedor_id}/${produto_id}`);
+      await api.delete(`/api/fornecedor-produtos/${fornecedor_id}/${produto_id}`);
     } catch (error: any) {
       console.error('Erro ao remover associação:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover associação');

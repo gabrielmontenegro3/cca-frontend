@@ -18,7 +18,7 @@ export const preventivoArquivosService = {
         params.append('tipo', filtros.tipo);
       }
 
-      const url = `/preventivo-arquivos${params.toString() ? `?${params}` : ''}`;
+      const url = `/api/preventivo-arquivos${params.toString() ? `?${params}` : ''}`;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
@@ -54,7 +54,7 @@ export const preventivoArquivosService = {
         throw new Error('arquivo é obrigatório');
       }
 
-      const response = await api.post('/preventivo-arquivos', dados);
+      const response = await api.post('/api/preventivo-arquivos', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar arquivo:', error);
@@ -69,7 +69,7 @@ export const preventivoArquivosService = {
         throw new Error('ID do arquivo é obrigatório');
       }
 
-      const response = await api.put(`/preventivo-arquivos/${id}`, dados);
+      const response = await api.put(`/api/preventivo-arquivos/${id}`, dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao atualizar arquivo:', error);
@@ -84,7 +84,7 @@ export const preventivoArquivosService = {
         throw new Error('ID do arquivo é obrigatório');
       }
 
-      await api.delete(`/preventivo-arquivos/${id}`);
+      await api.delete(`/api/preventivo-arquivos/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover arquivo:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover arquivo');

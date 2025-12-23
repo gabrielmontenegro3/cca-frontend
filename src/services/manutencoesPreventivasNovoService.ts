@@ -18,7 +18,7 @@ export const manutencoesPreventivasNovoService = {
         params.append('produto_id', filtros.produto_id.toString());
       }
 
-      const url = `/manutencoes-preventivas-novo${params.toString() ? `?${params}` : ''}`;
+      const url = `/api/manutencoes-preventivas-novo${params.toString() ? `?${params}` : ''}`;
       const response = await api.get(url);
       return response.data;
     } catch (error: any) {
@@ -33,7 +33,7 @@ export const manutencoesPreventivasNovoService = {
       if (!id) {
         throw new Error('ID da manutenção é obrigatório');
       }
-      const response = await api.get(`/manutencoes-preventivas-novo/${id}`);
+      const response = await api.get(`/api/manutencoes-preventivas-novo/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao buscar manutenção:', error);
@@ -44,7 +44,7 @@ export const manutencoesPreventivasNovoService = {
   // Criar manutenção
   criar: async (dados: CriarManutencaoPreventivaDTO): Promise<ManutencaoPreventiva> => {
     try {
-      const response = await api.post('/manutencoes-preventivas-novo', dados);
+      const response = await api.post('/api/manutencoes-preventivas-novo', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar manutenção:', error);
@@ -59,7 +59,7 @@ export const manutencoesPreventivasNovoService = {
         throw new Error('ID da manutenção é obrigatório');
       }
 
-      const response = await api.put(`/manutencoes-preventivas-novo/${id}`, dados);
+      const response = await api.put(`/api/manutencoes-preventivas-novo/${id}`, dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao atualizar manutenção:', error);
@@ -74,7 +74,7 @@ export const manutencoesPreventivasNovoService = {
         throw new Error('ID da manutenção é obrigatório');
       }
 
-      await api.delete(`/manutencoes-preventivas-novo/${id}`);
+      await api.delete(`/api/manutencoes-preventivas-novo/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover manutenção:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover manutenção');

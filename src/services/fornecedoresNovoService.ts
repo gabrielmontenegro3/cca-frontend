@@ -5,7 +5,7 @@ export const fornecedoresNovoService = {
   // Listar todos os fornecedores
   listar: async (): Promise<FornecedorNovo[]> => {
     try {
-      const response = await api.get('/fornecedores-novo');
+      const response = await api.get('/api/fornecedores-novo');
       return response.data;
     } catch (error: any) {
       console.error('Erro ao listar fornecedores:', error);
@@ -19,7 +19,7 @@ export const fornecedoresNovoService = {
       if (!id) {
         throw new Error('ID do fornecedor é obrigatório');
       }
-      const response = await api.get(`/fornecedores-novo/${id}`);
+      const response = await api.get(`/api/fornecedores-novo/${id}`);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao buscar fornecedor:', error);
@@ -34,7 +34,7 @@ export const fornecedoresNovoService = {
         throw new Error('nome é obrigatório');
       }
 
-      const response = await api.post('/fornecedores-novo', dados);
+      const response = await api.post('/api/fornecedores-novo', dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao criar fornecedor:', error);
@@ -49,7 +49,7 @@ export const fornecedoresNovoService = {
         throw new Error('ID do fornecedor é obrigatório');
       }
 
-      const response = await api.put(`/fornecedores-novo/${id}`, dados);
+      const response = await api.put(`/api/fornecedores-novo/${id}`, dados);
       return response.data;
     } catch (error: any) {
       console.error('Erro ao atualizar fornecedor:', error);
@@ -64,7 +64,7 @@ export const fornecedoresNovoService = {
         throw new Error('ID do fornecedor é obrigatório');
       }
 
-      await api.delete(`/fornecedores-novo/${id}`);
+      await api.delete(`/api/fornecedores-novo/${id}`);
     } catch (error: any) {
       console.error('Erro ao remover fornecedor:', error);
       throw new Error(error.response?.data?.error || error.message || 'Erro ao remover fornecedor');
