@@ -27,16 +27,20 @@ const Chatbot = () => {
   const chatWindowRef = useRef<HTMLDivElement>(null)
 
   // Verificar se o usuário tem permissão para ver o chatbot
-  const tipoUsuario = usuario?.tipo?.toLowerCase() || ''
-  const podeVerChatbot = tipoUsuario === 'morador' || tipoUsuario === 'construtora'
+  const tipoUsuario = usuario?.tipo?.toString().toLowerCase().trim() || ''
+  const podeVerChatbot = 
+    tipoUsuario === 'morador' || 
+    tipoUsuario === 'construtora' ||
+    tipoUsuario === '3' || // ID numérico para morador
+    tipoUsuario === '1'   // ID numérico para construtora
 
   // Scroll automático para a última mensagem
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Não renderizar se o usuário não tiver permissão
-  if (!podeVerChatbot) {
+  // Não renderizar se o usuário não tiver permissão ou não estiver autenticado
+  if (!usuario || !podeVerChatbot) {
     return null
   }
 
