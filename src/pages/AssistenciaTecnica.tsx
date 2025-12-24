@@ -1,7 +1,287 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { chamadosService } from '../services/chamadosService'
 import { Chamado } from '../types'
+
+// Componente de seleção de status com animação interativa
+interface StatusSelectorProps {
+  status: string
+  chamadoId: number
+  onStatusChange: (id: number, novoStatus: string) => void
+  getStatusColor: (status: string) => string
+  getStatusLabel: (status: string) => string
+}
+
+const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, getStatusLabel }: StatusSelectorProps) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<number | null>(null)
+
+  const statusOptions = [
+    { value: 'aberto', label: 'Aberto' },
+    { value: 'em_andamento', label: 'Em Andamento' },
+    { value: 'resolvido', label: 'Resolvido' },
+    { value: 'cancelado', label: 'Cancelado' }
+  ]
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    // Adiciona um pequeno delay antes de fechar para dar tempo de mover o mouse
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false)
+    }, 200)
+  }
+
+  const handleStatusClick = (novoStatus: string) => {
+    if (novoStatus !== status) {
+      onStatusChange(chamadoId, novoStatus)
+    }
+  }
+
+  // Limpar timeout ao desmontar
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative inline-flex items-center"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Badge do status atual */}
+      <div className="relative z-10 flex-shrink-0">
+        <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${getStatusColor(status)}`}>
+          {getStatusLabel(status)}
+        </span>
+      </div>
+
+      {/* Painel de seleção com animação - abre para a esquerda */}
+      <div
+        className={`
+          absolute right-full top-0 z-20
+          flex items-center gap-3
+          bg-gray-800 border border-gray-600 rounded-lg
+          shadow-2xl
+          backdrop-blur-sm
+          transition-all duration-500 ease-out
+          ${isHovered 
+            ? 'opacity-100 translate-x-0 w-auto pointer-events-auto visible px-4 py-2 overflow-visible mr-2' 
+            : 'opacity-0 translate-x-4 w-0 pointer-events-none invisible px-0 py-0 overflow-hidden mr-0 border-0'
+          }
+        `}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          transformOrigin: 'right center',
+          maxWidth: isHovered ? 'none' : '0',
+          minWidth: isHovered ? 'auto' : '0',
+          transition: 'opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), margin 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), min-width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}
+      >
+        <div className="flex items-center gap-3 whitespace-nowrap">
+          {statusOptions.map((option, index) => (
+            <label
+              key={option.value}
+              className={`
+                flex items-center gap-2 cursor-pointer
+                transition-all duration-300 ease-out
+                ${isHovered ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-2'}
+                hover:scale-110 active:scale-105
+                group
+              `}
+              style={{
+                transitionDelay: isHovered ? `${index * 70}ms` : `${(statusOptions.length - index - 1) * 40}ms`,
+                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}
+            >
+              <input
+                type="radio"
+                name={`status-${chamadoId}`}
+                value={option.value}
+                checked={status === option.value}
+                onChange={() => handleStatusClick(option.value)}
+                className="
+                  w-4 h-4
+                  text-blue-600
+                  bg-gray-700 border-gray-600
+                  focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800
+                  cursor-pointer
+                  transition-all duration-200
+                  hover:border-blue-400
+                "
+              />
+              <span className={`
+                text-xs font-medium
+                transition-colors duration-200
+                ${status === option.value 
+                  ? 'text-blue-400 font-semibold' 
+                  : 'text-gray-300 hover:text-white'
+                }
+              `}>
+                {option.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Componente de filtro de status com animação interativa
+interface StatusFilterSelectorProps {
+  filtroStatus: string
+  onFiltroChange: (novoFiltro: string) => void
+  getStatusColor: (status: string) => string
+  getStatusLabel: (status: string) => string
+}
+
+const StatusFilterSelector = ({ filtroStatus, onFiltroChange, getStatusColor, getStatusLabel }: StatusFilterSelectorProps) => {
+  const [isHovered, setIsHovered] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<number | null>(null)
+
+  const statusOptions = [
+    { value: '', label: 'Todos os status' },
+    { value: 'aberto', label: 'Aberto' },
+    { value: 'em_andamento', label: 'Em Andamento' },
+    { value: 'resolvido', label: 'Resolvido' },
+    { value: 'cancelado', label: 'Cancelado' }
+  ]
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsHovered(true)
+  }
+
+  const handleMouseLeave = () => {
+    // Adiciona um pequeno delay antes de fechar para dar tempo de mover o mouse
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false)
+    }, 200)
+  }
+
+  const handleFiltroClick = (novoFiltro: string) => {
+    if (novoFiltro !== filtroStatus) {
+      onFiltroChange(novoFiltro)
+    }
+  }
+
+  // Limpar timeout ao desmontar
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Determinar o label e cor do badge atual
+  const currentLabel = filtroStatus ? getStatusLabel(filtroStatus) : 'Todos os status'
+  const currentColor = filtroStatus ? getStatusColor(filtroStatus) : 'bg-gray-500 text-white'
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative inline-flex items-center"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Badge do filtro atual */}
+      <div className="relative z-10 flex-shrink-0">
+        <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${currentColor}`}>
+          {currentLabel}
+        </span>
+      </div>
+
+      {/* Painel de seleção com animação - abre para a direita */}
+      <div
+        className={`
+          absolute left-full top-0 z-20
+          flex items-center gap-3
+          bg-gray-800 border border-gray-600 rounded-lg
+          shadow-2xl
+          backdrop-blur-sm
+          transition-all duration-500 ease-out
+          ${isHovered 
+            ? 'opacity-100 translate-x-0 w-auto pointer-events-auto visible px-4 py-2 overflow-visible ml-2' 
+            : 'opacity-0 -translate-x-4 w-0 pointer-events-none invisible px-0 py-0 overflow-hidden ml-0 border-0'
+          }
+        `}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          transformOrigin: 'left center',
+          maxWidth: isHovered ? 'none' : '0',
+          minWidth: isHovered ? 'auto' : '0',
+          transition: 'opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), margin 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), min-width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}
+      >
+        <div className="flex items-center gap-3 whitespace-nowrap">
+          {statusOptions.map((option, index) => (
+            <label
+              key={option.value || 'todos'}
+              className={`
+                flex items-center gap-2 cursor-pointer
+                transition-all duration-300 ease-out
+                ${isHovered ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 -translate-x-2'}
+                hover:scale-110 active:scale-105
+                group
+              `}
+              style={{
+                transitionDelay: isHovered ? `${index * 70}ms` : `${(statusOptions.length - index - 1) * 40}ms`,
+                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}
+            >
+              <input
+                type="radio"
+                name={`filtro-status`}
+                value={option.value}
+                checked={filtroStatus === option.value}
+                onChange={() => handleFiltroClick(option.value)}
+                className="
+                  w-4 h-4
+                  text-blue-600
+                  bg-gray-700 border-gray-600
+                  focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800
+                  cursor-pointer
+                  transition-all duration-200
+                  hover:border-blue-400
+                "
+              />
+              <span className={`
+                text-xs font-medium
+                transition-colors duration-200
+                ${filtroStatus === option.value 
+                  ? 'text-blue-400 font-semibold' 
+                  : 'text-gray-300 hover:text-white'
+                }
+              `}>
+                {option.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const AssistenciaTecnica = () => {
   const { hasPermission, usuario: usuarioLogado } = useAuth()
@@ -22,9 +302,28 @@ const AssistenciaTecnica = () => {
       try {
         setLoading(true)
         
-        // Carregar chamados com filtro de status se houver
-        const filtros = filtroStatus ? { status: filtroStatus as any } : undefined
-        const chamadosData = await chamadosService.listar(filtros)
+        // Preparar filtros
+        const filtros: any = {}
+        
+        // Filtrar por status se houver
+        if (filtroStatus) {
+          filtros.status = filtroStatus as any
+        }
+        
+        // Construtora e Gestão Técnica podem ver todos os chamados
+        // Outros usuários (morador) veem apenas seus próprios chamados
+        if (usuarioLogado) {
+          const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase()
+          const podeVerTodos = tipoNormalizado === 'construtora' || tipoNormalizado === 'gestão tecnica' || tipoNormalizado === 'gestao tecnica'
+          
+          if (!podeVerTodos) {
+            filtros.usuario = usuarioLogado.id
+          }
+        }
+        
+        // Se não houver filtros, passar undefined para listar todos
+        const filtrosParaEnviar = Object.keys(filtros).length > 0 ? filtros : undefined
+        const chamadosData = await chamadosService.listar(filtrosParaEnviar)
         setChamados(chamadosData)
         
         setError(null)
@@ -37,7 +336,7 @@ const AssistenciaTecnica = () => {
     }
 
     carregarDados()
-  }, [filtroStatus, hasPermission])
+  }, [filtroStatus, hasPermission, usuarioLogado])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -189,17 +488,14 @@ const AssistenciaTecnica = () => {
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="flex-1 w-full md:w-auto">
             <label className="block text-sm font-medium text-gray-300 mb-2">Filtrar por Status:</label>
-            <select
-              value={filtroStatus}
-              onChange={(e) => setFiltroStatus(e.target.value)}
-              className="w-full md:w-auto bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Todos os status</option>
-              <option value="aberto">Aberto</option>
-              <option value="em_andamento">Em Andamento</option>
-              <option value="resolvido">Resolvido</option>
-              <option value="cancelado">Cancelado</option>
-            </select>
+            <div className="w-full md:w-auto">
+              <StatusFilterSelector
+                filtroStatus={filtroStatus}
+                onFiltroChange={setFiltroStatus}
+                getStatusColor={getStatusColor}
+                getStatusLabel={getStatusLabel}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -289,22 +585,32 @@ const AssistenciaTecnica = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 ml-4">
-                        {hasPermission('editar') ? (
-                          <select
-                            value={chamado.status}
-                            onChange={(e) => handleAtualizarStatus(chamado.id, e.target.value)}
-                            className="px-3 py-1 text-xs font-semibold rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                          >
-                            <option value="aberto">Aberto</option>
-                            <option value="em_andamento">Em Andamento</option>
-                            <option value="resolvido">Resolvido</option>
-                            <option value="cancelado">Cancelado</option>
-                          </select>
-                        ) : (
-                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(chamado.status)}`}>
-                            {getStatusLabel(chamado.status)}
-                          </span>
-                        )}
+                        {(() => {
+                          // Apenas usuários do tipo "gestão tecnica" podem mudar o status
+                          if (usuarioLogado) {
+                            const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase()
+                            const podeMudarStatus = tipoNormalizado === 'gestão tecnica' || tipoNormalizado === 'gestao tecnica'
+                            
+                            if (podeMudarStatus) {
+                              return (
+                                <StatusSelector
+                                  status={chamado.status}
+                                  chamadoId={chamado.id}
+                                  onStatusChange={handleAtualizarStatus}
+                                  getStatusColor={getStatusColor}
+                                  getStatusLabel={getStatusLabel}
+                                />
+                              )
+                            }
+                          }
+                          
+                          // Outros usuários apenas visualizam o status
+                          return (
+                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(chamado.status)}`}>
+                              {getStatusLabel(chamado.status)}
+                            </span>
+                          )
+                        })()}
                         {/* Botão de editar apenas para moradores (se for o próprio chamado) */}
                         {hasPermission('editar_proprio_chamado') && usuarioLogado && chamado.usuario === usuarioLogado.id && (
                           <button

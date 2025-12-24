@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
+import Chatbot from './components/Chatbot'
 import Login from './pages/Login'
 import VisaoGeral from './pages/VisaoGeral'
 import Empreendimento from './pages/Empreendimento'
@@ -99,11 +100,13 @@ function App() {
       <main className="ml-64 pt-16 p-6 min-h-screen">
         {renderContent()}
       </main>
+      <Chatbot />
     </div>
   )
 }
 
 export default App
+
 
 
 

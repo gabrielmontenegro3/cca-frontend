@@ -402,7 +402,8 @@ const Produtos = ({ setActivePage }: ProdutosProps) => {
                 produtosFiltrados.map((produto) => (
                   <tr 
                     key={produto.id} 
-                    className="hover:bg-gray-700/30 transition-all duration-200 group"
+                    onClick={() => abrirModalVisualizar(produto)}
+                    className="hover:bg-gray-700/30 transition-all duration-200 group cursor-pointer"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -451,7 +452,10 @@ const Produtos = ({ setActivePage }: ProdutosProps) => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => abrirModalVisualizar(produto)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            abrirModalVisualizar(produto)
+                          }}
                           className="p-2.5 text-green-400 hover:text-green-300 hover:bg-green-500/10 rounded-lg transition-all border border-transparent hover:border-green-500/30"
                           title="Visualizar detalhes"
                         >
@@ -463,7 +467,10 @@ const Produtos = ({ setActivePage }: ProdutosProps) => {
                         {hasPermission('editar') && (
                           <>
                             <button
-                              onClick={() => abrirModalEditar(produto)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                abrirModalEditar(produto)
+                              }}
                               className="p-2.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all border border-transparent hover:border-blue-500/30"
                               title="Editar produto"
                             >
@@ -472,7 +479,10 @@ const Produtos = ({ setActivePage }: ProdutosProps) => {
                               </svg>
                             </button>
                             <button
-                              onClick={() => setShowDeleteConfirm(produto.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setShowDeleteConfirm(produto.id)
+                              }}
                               className="p-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/30"
                               title="Excluir produto"
                             >
