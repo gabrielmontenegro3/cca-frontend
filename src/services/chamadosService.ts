@@ -1,17 +1,23 @@
 import api from './api';
-import { Chamado, FiltrosChamados } from '../types';
+import { Chamado, FiltrosChamados, MensagemChamado } from '../types';
 
 export interface CriarChamadoDTO {
   titulo: string;
   usuario: number;
   status?: 'aberto' | 'em_andamento' | 'resolvido' | 'cancelado';
   descricao?: string;
+  anexos?: File[]; // Arquivos anexos para a mensagem inicial
 }
 
 export interface AtualizarChamadoDTO {
   titulo?: string;
   status?: 'aberto' | 'em_andamento' | 'resolvido' | 'cancelado';
   descricao?: string;
+}
+
+export interface EnviarMensagemDTO {
+  mensagem: string;
+  anexos?: File[]; // Arquivos anexos para a mensagem
 }
 
 export const chamadosService = {
@@ -44,14 +50,33 @@ export const chamadosService = {
     return response.data;
   },
 
-  // Criar chamado
+  // Criar chamado (com suporte a anexos)
   criar: async (chamado: CriarChamadoDTO): Promise<Chamado> => {
-    const response = await api.post('/api/chamados', {
-      titulo: chamado.titulo,
-      usuario: chamado.usuario,
-      status: chamado.status || 'aberto',
-      descricao: chamado.descricao || null
-    });
+    const formData = new FormData();
+    
+    // Campos obrigatórios
+    formData.append('titulo', chamado.titulo);
+    
+    // Campos opcionais
+    if (chamado.descricao) {
+      formData.append('descricao', chamado.descricao);
+    }
+    
+    if (chamado.status) {
+      formData.append('status', chamado.status);
+    }
+
+    // Adicionar anexos se houver
+    // IMPORTANTE: Use o mesmo nome 'anexos' para todos os arquivos (sem colchetes)
+    if (chamado.anexos && chamado.anexos.length > 0) {
+      chamado.anexos.forEach((arquivo) => {
+        formData.append('anexos', arquivo);
+      });
+    }
+
+    // NÃO definir Content-Type manualmente - o axios detecta automaticamente FormData
+    // O header x-user-id é adicionado automaticamente pelo interceptor
+    const response = await api.post('/api/chamados', formData);
     return response.data;
   },
 
@@ -70,6 +95,24 @@ export const chamadosService = {
   // Deletar chamado
   deletar: async (id: number): Promise<void> => {
     await api.delete(`/api/chamados/${id}`);
+  },
+
+  // Enviar mensagem no chat do chamado
+  enviarMensagem: async (chamadoId: number, dados: EnviarMensagemDTO): Promise<MensagemChamado> => {
+    const formData = new FormData();
+    formData.append('mensagem', dados.mensagem);
+
+    // Adicionar anexos se houver
+    // IMPORTANTE: Use o mesmo nome 'anexos' para todos os arquivos
+    if (dados.anexos && dados.anexos.length > 0) {
+      dados.anexos.forEach((arquivo) => {
+        formData.append('anexos', arquivo);
+      });
+    }
+
+    // NÃO definir Content-Type manualmente - o axios detecta automaticamente FormData
+    const response = await api.post(`/api/chamados/${chamadoId}/mensagens`, formData);
+    return response.data;
   },
 };
 

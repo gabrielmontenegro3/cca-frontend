@@ -161,17 +161,43 @@ export type TipoChamado = 'MANUTENCAO' | 'REPARO' | 'INSTALACAO' | 'OUTRO'; // M
 export type StatusChamado = 'aberto' | 'em_andamento' | 'resolvido' | 'cancelado';
 export type ValidacaoGarantia = 'DENTRO_DA_GARANTIA' | 'FORA_DA_GARANTIA';
 
+export interface AnexoMensagem {
+  id: number;
+  url: string;
+  tipo: string; // MIME type
+}
+
+export interface MensagemChamado {
+  id: number;
+  autor_tipo: 'usuario' | 'tecnico';
+  autor_id: number;
+  mensagem: string;
+  created_at: string;
+  anexos: AnexoMensagem[];
+  autor_dados?: {
+    id: number;
+    nome: string;
+    tipo: TipoUsuario;
+  };
+}
+
 export interface Chamado {
   id: number;
   titulo: string;
   usuario: number; // ID do usuário que criou o chamado
   status: StatusChamado;
   descricao?: string;
+  created_at?: string;
+  updated_at?: string;
   usuario_dados?: {
     id: number;
     nome: string;
     tipo: TipoUsuario;
+    telefone?: string | null;
+    telefone2?: string | null;
+    unidade?: string | null;
   };
+  mensagens?: MensagemChamado[]; // Presente apenas quando buscar detalhes do chamado
   // Campos legados para compatibilidade (podem ser removidos no futuro)
   id_unidade?: number;
   id_produto?: number;
@@ -551,6 +577,9 @@ export interface Usuario {
   id: number;
   nome: string;
   tipo: TipoUsuario;
+  telefone?: string | null;
+  telefone2?: string | null;
+  unidade?: string | null;
 }
 
 export interface LoginDTO {
@@ -562,12 +591,18 @@ export interface CriarUsuarioDTO {
   nome: string;
   senha: string;
   tipo: TipoUsuario;
+  telefone?: string | null;
+  telefone2?: string | null;
+  unidade?: string | null;
 }
 
 export interface AtualizarUsuarioDTO {
   nome?: string;
   senha?: string;
   tipo?: TipoUsuario;
+  telefone?: string | null;
+  telefone2?: string | null;
+  unidade?: string | null;
 }
 
 

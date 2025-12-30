@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { chamadosService } from '../services/chamadosService'
 import { Chamado } from '../types'
+import { GaleriaImagens } from '../components/GaleriaImagens'
+import { ChatChamado } from '../components/ChatChamado'
 
 // Componente de seleção de status com animação interativa
 interface StatusSelectorProps {
@@ -15,7 +17,7 @@ interface StatusSelectorProps {
 const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, getStatusLabel }: StatusSelectorProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<number | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const statusOptions = [
     { value: 'aberto', label: 'Aberto' },
@@ -60,6 +62,7 @@ const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, get
       className="relative inline-flex items-center"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Badge do status atual */}
       <div className="relative z-10 flex-shrink-0">
@@ -106,6 +109,7 @@ const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, get
                 transitionDelay: isHovered ? `${index * 70}ms` : `${(statusOptions.length - index - 1) * 40}ms`,
                 transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <input
                 type="radio"
@@ -113,6 +117,7 @@ const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, get
                 value={option.value}
                 checked={status === option.value}
                 onChange={() => handleStatusClick(option.value)}
+                onClick={(e) => e.stopPropagation()}
                 className="
                   w-4 h-4
                   text-blue-600
@@ -152,7 +157,7 @@ interface StatusFilterSelectorProps {
 const StatusFilterSelector = ({ filtroStatus, onFiltroChange, getStatusColor, getStatusLabel }: StatusFilterSelectorProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<number | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const statusOptions = [
     { value: '', label: 'Todos os status' },
@@ -296,6 +301,11 @@ const AssistenciaTecnica = () => {
     descricao: ''
   })
   const [editingChamado, setEditingChamado] = useState<Chamado | null>(null)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [chamadoSelecionadoChat, setChamadoSelecionadoChat] = useState<number | null>(null)
+  const [anexosForm, setAnexosForm] = useState<File[]>([])
+  const [anexosPreview, setAnexosPreview] = useState<string[]>([])
+  const [chatRefreshKey, setChatRefreshKey] = useState(0)
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -324,7 +334,18 @@ const AssistenciaTecnica = () => {
         // Se não houver filtros, passar undefined para listar todos
         const filtrosParaEnviar = Object.keys(filtros).length > 0 ? filtros : undefined
         const chamadosData = await chamadosService.listar(filtrosParaEnviar)
-        setChamados(chamadosData)
+        
+        // Ordenar por data de criação (mais recentes primeiro)
+        const chamadosOrdenados = chamadosData.sort((a, b) => {
+          const dataA = a.created_at || a.data_criacao || ''
+          const dataB = b.created_at || b.data_criacao || ''
+          if (!dataA && !dataB) return 0
+          if (!dataA) return 1
+          if (!dataB) return -1
+          return new Date(dataB).getTime() - new Date(dataA).getTime()
+        })
+        
+        setChamados(chamadosOrdenados)
         
         setError(null)
       } catch (err) {
@@ -396,19 +417,28 @@ const AssistenciaTecnica = () => {
         setEditingChamado(null)
         alert('Chamado atualizado com sucesso!')
       } else {
-        // Criar novo chamado
+        // Criar novo chamado com anexos
+        const anexosParaEnviar = anexosForm.length > 0 ? anexosForm : (selectedImageFile ? [selectedImageFile] : [])
+        
         const novoChamado = await chamadosService.criar({
           titulo: formData.titulo,
           usuario: usuarioId,
           status: 'aberto',
-          descricao: formData.descricao || undefined
+          descricao: formData.descricao || undefined,
+          anexos: anexosParaEnviar.length > 0 ? anexosParaEnviar : undefined
         })
         
         setChamados([novoChamado, ...chamados])
         alert('Chamado criado com sucesso!')
+        
+        // Abrir chat do chamado criado
+        setChamadoSelecionadoChat(novoChamado.id)
       }
       
       setFormData({ titulo: '', descricao: '' })
+      setSelectedImageFile(null)
+      setAnexosForm([])
+      setAnexosPreview([])
     } catch (err) {
       alert(err instanceof Error ? err.message : editingChamado ? 'Erro ao atualizar chamado' : 'Erro ao criar chamado')
       console.error('Erro ao processar chamado:', err)
@@ -434,12 +464,92 @@ const AssistenciaTecnica = () => {
   const handleCancelarEdicao = () => {
     setEditingChamado(null)
     setFormData({ titulo: '', descricao: '' })
+    setSelectedImageFile(null)
+    setAnexosForm([])
+    setAnexosPreview([])
+  }
+
+  const handleAnexosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const fileArray = Array.from(files)
+    const validFiles: File[] = []
+
+    fileArray.forEach((file) => {
+      // Validar tamanho (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`O arquivo ${file.name} excede 10MB e será ignorado`)
+        return
+      }
+
+      validFiles.push(file)
+
+      // Criar preview para imagens
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setAnexosPreview(prev => [...prev, reader.result as string])
+        }
+        reader.readAsDataURL(file)
+      } else {
+        setAnexosPreview(prev => [...prev, ''])
+      }
+    })
+
+    setAnexosForm(prev => [...prev, ...validFiles].slice(0, 10)) // Máximo 10 arquivos
+  }
+
+  const removerAnexo = (index: number) => {
+    setAnexosForm(prev => prev.filter((_, i) => i !== index))
+    setAnexosPreview(prev => prev.filter((_, i) => i !== index))
+    const fileInput = document.getElementById('chamado-anexos-input') as HTMLInputElement
+    if (fileInput) {
+      fileInput.value = ''
+    }
   }
 
   const handleAtualizarStatus = async (id: number, novoStatus: string) => {
     try {
+      // Buscar o chamado atual para obter o status anterior
+      const chamadoAtual = chamados.find(c => c.id === id)
+      const statusAnterior = chamadoAtual?.status || 'aberto'
+      
+      // Atualizar o status
       const chamadoAtualizado = await chamadosService.atualizarStatus(id, novoStatus as any)
       setChamados(chamados.map(c => c.id === id ? chamadoAtualizado : c))
+      
+      // Se o usuário for Gestão Técnica, registrar a mudança no chat
+      if (usuarioLogado) {
+        const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase()
+        const isGestaoTecnica = tipoNormalizado === 'gestão tecnica' || tipoNormalizado === 'gestao tecnica'
+        
+        if (isGestaoTecnica && statusAnterior !== novoStatus) {
+          // Criar mensagem automática sobre a mudança de status
+          const statusLabels: Record<string, string> = {
+            aberto: 'Aberto',
+            em_andamento: 'Em Andamento',
+            resolvido: 'Resolvido',
+            cancelado: 'Cancelado'
+          }
+          
+          const mensagemStatus = `Status alterado de "${statusLabels[statusAnterior] || statusAnterior}" para "${statusLabels[novoStatus] || novoStatus}"`
+          
+          try {
+            await chamadosService.enviarMensagem(id, {
+              mensagem: mensagemStatus
+            })
+            
+            // Se o chat estiver aberto, forçar recarregamento para mostrar o novo aviso
+            if (chamadoSelecionadoChat === id) {
+              setChatRefreshKey(prev => prev + 1)
+            }
+          } catch (err) {
+            console.error('Erro ao registrar mudança de status no chat:', err)
+            // Não mostrar erro ao usuário, pois o status já foi atualizado
+          }
+        }
+      }
     } catch (err) {
       alert('Erro ao atualizar status do chamado')
       console.error('Erro ao atualizar status:', err)
@@ -500,9 +610,9 @@ const AssistenciaTecnica = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${chamadoSelecionadoChat ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'}`}>
         {/* Formulário de Novo/Editar Chamado - apenas para morador (não para gestão técnica) */}
-        {hasPermission('criar_chamado') && (
+        {hasPermission('criar_chamado') && !chamadoSelecionadoChat && (
           <div className="bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600">
             <h3 className="text-xl font-semibold text-white mb-4">
               {editingChamado ? 'Editar Chamado' : 'Novo Chamado'}
@@ -533,6 +643,71 @@ const AssistenciaTecnica = () => {
                 placeholder="Descreva o problema em detalhes..."
               />
             </div>
+            {!editingChamado && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Anexos (opcional, máximo 10 arquivos, 10MB cada)
+                </label>
+                <div className="space-y-2">
+                  <input
+                    id="chamado-anexos-input"
+                    type="file"
+                    multiple
+                    accept="image/*,application/pdf"
+                    onChange={handleAnexosChange}
+                    disabled={submitting}
+                    className="
+                      block w-full text-sm text-gray-300
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-lg file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-600 file:text-white
+                      file:hover:bg-blue-700
+                      file:cursor-pointer
+                      file:disabled:opacity-50 file:disabled:cursor-not-allowed
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      bg-gray-800 border border-gray-600 rounded-lg
+                    "
+                  />
+                  {anexosForm.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {anexosForm.map((arquivo, index) => (
+                        <div
+                          key={index}
+                          className="relative bg-gray-800 border border-gray-600 rounded-lg p-2"
+                        >
+                          {anexosPreview[index] ? (
+                            <img
+                              src={anexosPreview[index]}
+                              alt="Preview"
+                              className="w-full h-20 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-full h-20 flex items-center justify-center bg-gray-700 rounded">
+                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removerAnexo(index)}
+                            disabled={submitting}
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-700 disabled:opacity-50"
+                          >
+                            ×
+                          </button>
+                          <p className="text-xs text-gray-400 mt-1 truncate">{arquivo.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400 italic">
+                    Os anexos serão enviados com a mensagem inicial do chamado
+                  </p>
+                </div>
+              </div>
+            )}
             {usuarioLogado && (
               <div className="text-sm text-gray-400 bg-gray-800 rounded-lg p-3">
                 <p>Usuário: <strong className="text-white">{usuarioLogado.nome}</strong></p>
@@ -554,34 +729,64 @@ const AssistenciaTecnica = () => {
                 disabled={submitting}
                 className={`${editingChamado ? 'flex-1' : 'w-full'} px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md`}
               >
-                {submitting ? (editingChamado ? 'Salvando...' : 'Enviando...') : (editingChamado ? 'Salvar Alterações' : 'Enviar Chamado')}
+                {submitting 
+                  ? (editingChamado ? 'Salvando...' : 'Criando chamado...') 
+                  : (editingChamado ? 'Salvar Alterações' : 'Enviar Chamado')
+                }
               </button>
             </div>
           </form>
         </div>
         )}
 
-        <div className={`${hasPermission('criar_chamado') ? '' : 'lg:col-span-2'}`}>
+        <div className={`${chamadoSelecionadoChat ? 'lg:col-span-1' : hasPermission('criar_chamado') ? '' : 'lg:col-span-2'}`}>
           <div className="bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600">
             <h3 className="text-xl font-semibold text-white mb-4">Chamados</h3>
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            <div className={`space-y-3 ${chamadoSelecionadoChat ? 'max-h-[800px]' : 'max-h-[600px]'} overflow-y-auto`}>
               {chamados.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">Nenhum chamado registrado.</p>
                 </div>
               ) : (
-                chamados.map((chamado) => (
-                  <div key={chamado.id} className="bg-gray-800 border border-gray-600 rounded-lg p-4 hover:bg-gray-750 transition-colors">
+                chamados.map((chamado) => {
+                  // Verificar se o usuário pode abrir o chat deste chamado
+                  const podeAbrirChat = () => {
+                    if (!usuarioLogado) return false;
+                    const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase();
+                    // Morador só pode abrir chat de seus próprios chamados
+                    if (tipoNormalizado === 'morador' && chamado.usuario !== usuarioLogado.id) {
+                      return false;
+                    }
+                    // Gestão Técnica, Construtora e Administrador podem abrir qualquer chat
+                    return true;
+                  };
+
+                  return (
+                    <div 
+                      key={chamado.id} 
+                      onClick={(e) => {
+                        // Não abrir chat se clicar em botões ou elementos interativos
+                        const target = e.target as HTMLElement;
+                        if (target.closest('button') || target.closest('input') || target.closest('label')) {
+                          return;
+                        }
+                        if (podeAbrirChat()) {
+                          setChamadoSelecionadoChat(chamado.id);
+                        }
+                      }}
+                      className={`bg-gray-800 border border-gray-600 rounded-lg p-4 transition-colors ${
+                        podeAbrirChat() ? 'hover:bg-gray-750 cursor-pointer' : 'cursor-default'
+                      }`}
+                    >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <h4 className="font-semibold text-white text-lg">{chamado.titulo}</h4>
                         <p className="text-sm text-gray-400 mt-1">
-                          {chamado.usuario_dados ? (
+                          {chamado.usuario_dados && (
                             <>Usuário: <strong className="text-gray-300">{chamado.usuario_dados.nome}</strong></>
-                          ) : (
-                            <>ID Usuário: {chamado.usuario}</>
                           )}
-                          {chamado.data_criacao && ` • ${formatarData(chamado.data_criacao)}`}
+                          {chamado.data_criacao && chamado.usuario_dados && ` • ${formatarData(chamado.data_criacao)}`}
+                          {chamado.data_criacao && !chamado.usuario_dados && formatarData(chamado.data_criacao)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 ml-4">
@@ -614,7 +819,10 @@ const AssistenciaTecnica = () => {
                         {/* Botão de editar apenas para moradores (se for o próprio chamado) */}
                         {hasPermission('editar_proprio_chamado') && usuarioLogado && chamado.usuario === usuarioLogado.id && (
                           <button
-                            onClick={() => handleEditarChamado(chamado)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditarChamado(chamado);
+                            }}
                             className="p-2 text-blue-400 hover:text-blue-300 hover:bg-gray-700 rounded-lg transition-colors"
                             title="Editar chamado"
                           >
@@ -626,7 +834,10 @@ const AssistenciaTecnica = () => {
                         {/* Botão de deletar apenas para administradores */}
                         {hasPermission('gerenciar_usuarios') && (
                           <button
-                            onClick={() => handleDeletarChamado(chamado.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletarChamado(chamado.id);
+                            }}
                             className="p-2 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-lg transition-colors"
                             title="Deletar chamado"
                           >
@@ -640,12 +851,68 @@ const AssistenciaTecnica = () => {
                     {chamado.descricao && (
                       <p className="text-sm text-gray-300 mt-3 pt-3 border-t border-gray-600">{chamado.descricao}</p>
                     )}
-                  </div>
-                ))
+                    <GaleriaImagens 
+                      chamadoId={chamado.id}
+                      canRemove={!!(hasPermission('gerenciar_usuarios') || (hasPermission('editar_proprio_chamado') && usuarioLogado && chamado.usuario === usuarioLogado.id))}
+                    />
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
         </div>
+
+        {/* Chat do Chamado */}
+        {chamadoSelecionadoChat && (
+          <div className="lg:col-span-2">
+            <div className="bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 h-[800px]">
+              <ChatChamado 
+                chamadoId={chamadoSelecionadoChat}
+                refreshKey={chatRefreshKey}
+                onSelecionarChamado={(novoChamadoId) => {
+                  setChamadoSelecionadoChat(novoChamadoId);
+                }}
+                onClose={() => {
+                  setChamadoSelecionadoChat(null)
+                  // Recarregar chamados para atualizar updated_at
+                  const carregarDados = async () => {
+                    try {
+                      const filtros: any = {}
+                      if (filtroStatus) {
+                        filtros.status = filtroStatus as any
+                      }
+                      if (usuarioLogado) {
+                        const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase()
+                        const podeVerTodos = tipoNormalizado === 'construtora' || tipoNormalizado === 'gestão tecnica' || tipoNormalizado === 'gestao tecnica'
+                        if (!podeVerTodos) {
+                          filtros.usuario = usuarioLogado.id
+                        }
+                      }
+                      const filtrosParaEnviar = Object.keys(filtros).length > 0 ? filtros : undefined
+                      const chamadosData = await chamadosService.listar(filtrosParaEnviar)
+                      
+                      // Ordenar por data de criação (mais recentes primeiro)
+                      const chamadosOrdenados = chamadosData.sort((a, b) => {
+                        const dataA = a.created_at || a.data_criacao || ''
+                        const dataB = b.created_at || b.data_criacao || ''
+                        if (!dataA && !dataB) return 0
+                        if (!dataA) return 1
+                        if (!dataB) return -1
+                        return new Date(dataB).getTime() - new Date(dataA).getTime()
+                      })
+                      
+                      setChamados(chamadosOrdenados)
+                    } catch (err) {
+                      console.error('Erro ao recarregar chamados:', err)
+                    }
+                  }
+                  carregarDados()
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

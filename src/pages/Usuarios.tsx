@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { usuariosService } from '../services/usuariosService'
 import { Usuario, TipoUsuario, CriarUsuarioDTO, AtualizarUsuarioDTO } from '../types'
+import { formatarTelefone } from '../utils/mascaraTelefone'
 
 const Usuarios = () => {
   const { usuario: usuarioLogado, hasPermission } = useAuth()
@@ -13,7 +14,10 @@ const Usuarios = () => {
   const [formData, setFormData] = useState<CriarUsuarioDTO>({
     nome: '',
     senha: '',
-    tipo: 'morador'
+    tipo: 'morador',
+    telefone: '',
+    telefone2: '',
+    unidade: ''
   })
 
   useEffect(() => {
@@ -46,14 +50,20 @@ const Usuarios = () => {
       setFormData({
         nome: usuario.nome,
         senha: '',
-        tipo: usuario.tipo
+        tipo: usuario.tipo,
+        telefone: usuario.telefone || '',
+        telefone2: usuario.telefone2 || '',
+        unidade: usuario.unidade || ''
       })
     } else {
       setEditingUsuario(null)
       setFormData({
         nome: '',
         senha: '',
-        tipo: 'morador'
+        tipo: 'morador',
+        telefone: '',
+        telefone2: '',
+        unidade: ''
       })
     }
     setShowModal(true)
@@ -65,7 +75,10 @@ const Usuarios = () => {
     setFormData({
       nome: '',
       senha: '',
-      tipo: 'morador'
+      tipo: 'morador',
+      telefone: '',
+      telefone2: '',
+      unidade: ''
     })
   }
 
@@ -76,14 +89,25 @@ const Usuarios = () => {
       if (editingUsuario) {
         const dadosAtualizacao: AtualizarUsuarioDTO = {
           nome: formData.nome,
-          tipo: formData.tipo
+          tipo: formData.tipo,
+          telefone: formData.telefone?.trim() || null,
+          telefone2: formData.telefone2?.trim() || null,
+          unidade: formData.unidade?.trim() || null
         }
         if (formData.senha) {
           dadosAtualizacao.senha = formData.senha
         }
         await usuariosService.atualizar(editingUsuario.id, dadosAtualizacao)
       } else {
-        await usuariosService.criar(formData)
+        const dadosCriacao: CriarUsuarioDTO = {
+          nome: formData.nome,
+          senha: formData.senha,
+          tipo: formData.tipo,
+          telefone: formData.telefone?.trim() || null,
+          telefone2: formData.telefone2?.trim() || null,
+          unidade: formData.unidade?.trim() || null
+        }
+        await usuariosService.criar(dadosCriacao)
       }
       
       // Recarregar lista
@@ -184,6 +208,15 @@ const Usuarios = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Tipo
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Telefone
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Telefone 2
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Unidade
+                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Ações
                 </th>
@@ -192,7 +225,7 @@ const Usuarios = () => {
             <tbody className="divide-y divide-gray-600">
               {usuarios.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-400">
                     Nenhum usuário cadastrado
                   </td>
                 </tr>
@@ -207,6 +240,15 @@ const Usuarios = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {getTipoLabel(usuario.tipo)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {usuario.telefone || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {usuario.telefone2 || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {usuario.unidade || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -280,6 +322,50 @@ const Usuarios = () => {
                   <option value="administrador">4 - Administrador</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Telefone
+                </label>
+                <input
+                  type="tel"
+                  value={formData.telefone || ''}
+                  onChange={(e) => {
+                    const valorFormatado = formatarTelefone(e.target.value)
+                    setFormData({ ...formData, telefone: valorFormatado })
+                  }}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="(11) 98765-4321"
+                  maxLength={15}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Telefone 2 (Opcional)
+                </label>
+                <input
+                  type="tel"
+                  value={formData.telefone2 || ''}
+                  onChange={(e) => {
+                    const valorFormatado = formatarTelefone(e.target.value)
+                    setFormData({ ...formData, telefone2: valorFormatado })
+                  }}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="(11) 91234-5678"
+                  maxLength={15}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Unidade
+                </label>
+                <input
+                  type="text"
+                  value={formData.unidade || ''}
+                  onChange={(e) => setFormData({ ...formData, unidade: e.target.value })}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Ex: Apto 101, Bloco A, etc"
+                />
+              </div>
               <div className="flex justify-end space-x-4 pt-4">
                 <button
                   type="button"
@@ -304,3 +390,4 @@ const Usuarios = () => {
 }
 
 export default Usuarios
+

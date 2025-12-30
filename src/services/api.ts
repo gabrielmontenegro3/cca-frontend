@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import API_BASE_URL from '../config/api';
 
 const api: AxiosInstance = axios.create({
@@ -7,6 +7,40 @@ const api: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Interceptor para adicionar x-user-id automaticamente
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // Obter usuário do localStorage
+    const usuarioSalvo = localStorage.getItem('usuario');
+    if (usuarioSalvo) {
+      try {
+        const usuarioData = JSON.parse(usuarioSalvo);
+        if (usuarioData.id) {
+          // Adicionar header x-user-id
+          if (config.headers) {
+            config.headers['x-user-id'] = usuarioData.id.toString();
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao obter ID do usuário:', error);
+      }
+    }
+
+    // Se for FormData, remover Content-Type para deixar o browser definir automaticamente
+    // Isso é necessário porque o axios pode definir Content-Type incorretamente para FormData
+    if (config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers['Content-Type'];
+      }
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Interceptor para tratamento de erros
 api.interceptors.response.use(
