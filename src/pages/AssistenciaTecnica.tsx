@@ -17,7 +17,7 @@ interface StatusSelectorProps {
 const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, getStatusLabel }: StatusSelectorProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const statusOptions = [
     { value: 'aberto', label: 'Aberto' },
@@ -157,7 +157,7 @@ interface StatusFilterSelectorProps {
 const StatusFilterSelector = ({ filtroStatus, onFiltroChange, getStatusColor, getStatusLabel }: StatusFilterSelectorProps) => {
   const [isHovered, setIsHovered] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const statusOptions = [
     { value: '', label: 'Todos os status' },
