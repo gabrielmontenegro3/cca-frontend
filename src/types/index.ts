@@ -605,6 +605,57 @@ export interface AtualizarUsuarioDTO {
   unidade?: string | null;
 }
 
+// Tipos para Vistoria/Laudo
+export interface ArquivoLaudo {
+  id: string; // UUID
+  vistoria_laudo_id: string;
+  mensagem_id: string | null; // null se for arquivo direto do laudo
+  usuario_id: number;
+  file_name: string;
+  file_path: string;
+  file_type: string; // MIME type
+  created_at: string;
+  url?: string; // URL assinada (quando listado)
+}
+
+export interface MensagemLaudo {
+  id: string; // UUID
+  vistoria_laudo_id: string;
+  usuario_id: number;
+  mensagem: string;
+  created_at: string;
+  arquivos: ArquivoLaudo[]; // Arquivos anexados a esta mensagem
+}
+
+export interface Laudo {
+  id: string; // UUID
+  titulo: string;
+  chamado_id: number;
+  usuario_id: number;
+  created_at: string;
+  updated_at: string;
+  mensagens?: MensagemLaudo[]; // Presente quando buscar detalhes
+  arquivos?: ArquivoLaudo[]; // Arquivos diretos do laudo (sem mensagem)
+}
+
+export interface CriarLaudoDTO {
+  titulo: string; // OBRIGATÓRIO
+  chamado_id: number; // OBRIGATÓRIO
+}
+
+export interface AtualizarLaudoDTO {
+  titulo?: string;
+}
+
+export interface EnviarMensagemLaudoDTO {
+  mensagem: string; // OBRIGATÓRIO
+  arquivos?: File[]; // Opcional: múltiplos arquivos
+}
+
+export interface FiltrosLaudos {
+  chamado_id?: number;
+}
+
 
 
 

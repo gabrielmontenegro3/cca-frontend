@@ -19,6 +19,7 @@ import PerguntasFrequentes from './pages/PerguntasFrequentes'
 import SobreNos from './pages/SobreNos'
 import BoletimInformativo from './pages/BoletimInformativo'
 import AssistenciaTecnica from './pages/AssistenciaTecnica'
+import InspecaoLaudo from './pages/InspecaoLaudo'
 import Usuarios from './pages/Usuarios'
 
 type Page = 
@@ -38,6 +39,7 @@ type Page =
   | 'sobre-nos'
   | 'boletim-informativo'
   | 'assistencia-tecnica'
+  | 'inspecao-laudo'
   | 'usuarios'
 
 function App() {
@@ -86,6 +88,8 @@ function App() {
         return <BoletimInformativo />
       case 'assistencia-tecnica':
         return <AssistenciaTecnica />
+      case 'inspecao-laudo':
+        return <InspecaoLaudo />
       case 'usuarios':
         return <Usuarios />
       default:

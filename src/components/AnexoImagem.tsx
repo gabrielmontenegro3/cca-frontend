@@ -160,9 +160,9 @@ export const AnexoImagem: React.FC<AnexoImagemProps> = ({ anexo, onRenovarUrls }
   // Para PDFs, mostrar botão de download com nome do arquivo
   if (isPDF) {
     return (
-      <div className="flex items-center gap-3 p-3 bg-red-900/20 border border-red-700/50 rounded-lg hover:bg-red-900/30 transition-colors">
+      <div className="flex items-center gap-4 p-4 bg-gray-700/50 border border-gray-600 rounded-lg hover:bg-gray-700/70 transition-colors w-full">
         <div className="flex-shrink-0">
-          <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
           </svg>
         </div>
@@ -174,7 +174,7 @@ export const AnexoImagem: React.FC<AnexoImagemProps> = ({ anexo, onRenovarUrls }
         </div>
         <button
           onClick={handleDownload}
-          className="flex-shrink-0 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
+          className="flex-shrink-0 px-5 py-2.5 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors flex items-center gap-2"
           title="Baixar PDF"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

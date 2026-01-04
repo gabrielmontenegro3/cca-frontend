@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import logoBranca from '../components/LOGO BRANCA.png'
 
 const Login = () => {
   const [nome, setNome] = useState('')
@@ -28,8 +29,9 @@ const Login = () => {
     <div className="min-h-screen bg-gray-800 flex items-center justify-center">
       <div className="bg-gray-700 rounded-lg shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">CCA Sistema</h1>
-          <p className="text-gray-400">Faça login para continuar</p>
+          <div className="flex justify-center mb-4">
+            <img src={logoBranca} alt="CCA" className="h-20 w-auto" />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -87,3 +89,4 @@ const Login = () => {
 }
 
 export default Login
+
