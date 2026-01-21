@@ -2,8 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { chamadosService } from '../services/chamadosService';
 import { Chamado, MensagemChamado, Usuario } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 import { AnexoImagem } from './AnexoImagem';
 import { usuariosService } from '../services/usuariosService';
+import { SeletorAnexo } from './SeletorAnexo';
 
 interface ChatChamadoProps {
   chamadoId: number;
@@ -14,11 +16,13 @@ interface ChatChamadoProps {
 
 export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, refreshKey, onSelecionarChamado }) => {
   const { usuario } = useAuth();
+  const { setIsChatOpen } = useChat();
   const [chamado, setChamado] = useState<Chamado | null>(null);
   const [showUsuarioModal, setShowUsuarioModal] = useState(false);
   const [usuarioCompleto, setUsuarioCompleto] = useState<Usuario | null>(null);
   const [chamadosUsuario, setChamadosUsuario] = useState<Chamado[]>([]);
   const [loadingChamados, setLoadingChamados] = useState(false);
+  const [showSeletorAnexo, setShowSeletorAnexo] = useState(false);
 
   // Verificar se o usuário pode enviar mensagens no chat
   const podeEnviarMensagem = () => {
@@ -151,8 +155,12 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
   useEffect(() => {
     if (chamadoId) {
       carregarChamado();
+      setIsChatOpen(true);
     }
-  }, [chamadoId, refreshKey]);
+    return () => {
+      setIsChatOpen(false);
+    };
+  }, [chamadoId, refreshKey, setIsChatOpen]);
 
   // Renovação automática de URLs a cada 6 dias (antes de expirar em 7 dias)
   useEffect(() => {
@@ -222,20 +230,10 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
     carregarChamadosUsuario();
   }, [showUsuarioModal, chamado?.usuario]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const fileArray = Array.from(files);
+  const handleFileSelect = (files: File[]) => {
     const validFiles: File[] = [];
 
-    fileArray.forEach((file) => {
-      // Validar tamanho (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert(`O arquivo ${file.name} excede 10MB e será ignorado`);
-        return;
-      }
-
+    files.forEach((file) => {
       validFiles.push(file);
 
       // Criar preview para imagens
@@ -674,24 +672,15 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
         ) : (
           <>
             <div className="flex gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                accept="image/*,application/pdf"
-                className="hidden"
-                id="chat-file-input"
-              />
-              <label
-                htmlFor="chat-file-input"
+              <button
+                onClick={() => setShowSeletorAnexo(true)}
                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors cursor-pointer"
                 title="Anexar arquivo"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                 </svg>
-              </label>
+              </button>
               
               <textarea
                 value={novaMensagem}
@@ -721,6 +710,16 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
           </>
         )}
       </div>
+
+      {/* Seletor de Anexo */}
+      {showSeletorAnexo && (
+        <SeletorAnexo
+          onFileSelect={handleFileSelect}
+          onClose={() => setShowSeletorAnexo(false)}
+          maxFiles={10}
+          accept="image/*,application/pdf"
+        />
+      )}
     </div>
   );
 };

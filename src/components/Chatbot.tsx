@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useChat } from '../context/ChatContext'
 import api from '../services/api'
 
 interface Message {
@@ -11,6 +12,7 @@ interface Message {
 
 const Chatbot = () => {
   const { usuario } = useAuth()
+  const { isChatOpen } = useChat()
   const [isOpen, setIsOpen] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
@@ -39,8 +41,8 @@ const Chatbot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Não renderizar se o usuário não tiver permissão ou não estiver autenticado
-  if (!usuario || !podeVerChatbot) {
+  // Não renderizar se o usuário não tiver permissão, não estiver autenticado, ou se o chat estiver aberto
+  if (!usuario || !podeVerChatbot || isChatOpen) {
     return null
   }
 

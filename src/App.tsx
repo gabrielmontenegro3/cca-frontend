@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
@@ -6,7 +6,6 @@ import Chatbot from './components/Chatbot'
 import Login from './pages/Login'
 import VisaoGeral from './pages/VisaoGeral'
 import Empreendimento from './pages/Empreendimento'
-import MeuImovel from './pages/MeuImovel'
 import Garantias from './pages/Garantias'
 import Preventivos from './pages/Preventivos'
 import ManutencaoUso from './pages/ManutencaoUso'
@@ -25,7 +24,6 @@ import Usuarios from './pages/Usuarios'
 type Page = 
   | 'visao-geral'
   | 'empreendimento'
-  | 'meu-imovel'
   | 'garantias'
   | 'garantias-lote'
   | 'preventivos'
@@ -45,10 +43,30 @@ type Page =
 function App() {
   const { isAuthenticated } = useAuth()
   const [activePage, setActivePage] = useState<Page>('visao-geral')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detectar se é mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024) // lg breakpoint do Tailwind
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(false) // Sempre fechar em desktop
+      }
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Função wrapper para converter Dispatch<SetStateAction<Page>> em (page: Page) => void
   const handleSetActivePage = (page: Page) => {
     setActivePage(page)
+    // Fechar sidebar em mobile após selecionar página
+    if (isMobile) {
+      setSidebarOpen(false)
+    }
   }
 
   // Se não estiver autenticado, mostrar tela de login
@@ -62,8 +80,6 @@ function App() {
         return <VisaoGeral />
       case 'empreendimento':
         return <Empreendimento />
-      case 'meu-imovel':
-        return <MeuImovel />
       case 'garantias':
         return <Garantias setActivePage={handleSetActivePage} />
       case 'preventivos':
@@ -71,7 +87,7 @@ function App() {
       case 'manutencao-uso':
         return <ManutencaoUso />
       case 'locais':
-        return <Locais />
+        return <Locais setActivePage={handleSetActivePage} />
       case 'produtos':
         return <Produtos setActivePage={handleSetActivePage} />
       case 'fornecedores':
@@ -99,9 +115,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-800">
-      <Sidebar activePage={activePage} setActivePage={setActivePage} />
-      <Navbar />
-      <main className="ml-64 pt-16 p-6 min-h-screen">
+      <Sidebar 
+        activePage={activePage} 
+        setActivePage={handleSetActivePage}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isMobile={isMobile}
+      />
+      {/* Overlay para mobile */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} isMobile={isMobile} />
+      <main className={`pt-16 min-h-screen transition-all duration-300 ${
+        isMobile ? 'ml-0 px-4' : 'ml-64 px-6'
+      }`}>
         {renderContent()}
       </main>
       <Chatbot />

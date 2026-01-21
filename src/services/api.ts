@@ -72,6 +72,11 @@ api.interceptors.response.use(
             errorMessage = 'Erro ao processar requisição';
         }
       }
+      
+      // Melhorar mensagem de erro específica para problemas de banco de dados
+      if (errorMessage && errorMessage.includes('table') && errorMessage.includes('schema cache')) {
+        errorMessage = 'Erro de configuração do banco de dados. Verifique se as tabelas foram criadas corretamente no backend. O backend está tentando acessar uma tabela que não existe no banco de dados.';
+      }
       throw new Error(errorMessage);
     } else if (error.request) {
       // Erro de rede

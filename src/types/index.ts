@@ -319,7 +319,9 @@ export interface FornecedorNovo {
   id: number;
   nome: string;
   email?: string;
-  telefone?: string;
+  telefone?: string; // Telefone 1
+  telefone2?: string; // Telefone 2
+  cnpj?: string;
   endereco?: string;
   complemento?: string;
   ponto_referencia?: string;
@@ -331,7 +333,9 @@ export interface FornecedorNovo {
 export interface CriarFornecedorNovoDTO {
   nome: string; // OBRIGATÓRIO
   email?: string;
-  telefone?: string;
+  telefone?: string; // Telefone 1
+  telefone2?: string; // Telefone 2
+  cnpj?: string;
   endereco?: string;
   complemento?: string;
   ponto_referencia?: string;
@@ -343,7 +347,9 @@ export interface CriarFornecedorNovoDTO {
 export interface AtualizarFornecedorNovoDTO {
   nome?: string;
   email?: string;
-  telefone?: string;
+  telefone?: string; // Telefone 1
+  telefone2?: string; // Telefone 2
+  cnpj?: string;
   endereco?: string;
   complemento?: string;
   ponto_referencia?: string;
@@ -399,13 +405,14 @@ export interface GarantiaNovo {
   produto_id?: number;
   local_id?: number;
   fornecedor_id?: number;
-  duracao?: string;
+  duracao?: string; // Tempo da garantia
   cobertura?: string;
   documentos?: string;
   descricao?: string;
-  perda_garantia?: string;
-  data_compra?: string; // YYYY-MM-DD
-  data_expiracao?: string; // YYYY-MM-DD
+  perda_garantia?: string; // Perda da garantia em caso de
+  cuidados_com_produto?: string; // Cuidados com o produto
+  data_compra?: string; // YYYY-MM-DD - Data da compra
+  data_expiracao?: string; // YYYY-MM-DD - Data final da garantia
   produto?: ProdutoNovo | null;
   local?: Local | null;
   fornecedor?: FornecedorNovo | null;
@@ -415,26 +422,28 @@ export interface CriarGarantiaNovoDTO {
   produto_id?: number;
   local_id?: number;
   fornecedor_id?: number;
-  duracao?: string;
+  duracao?: string; // Tempo da garantia
   cobertura?: string;
   documentos?: string;
   descricao?: string;
-  perda_garantia?: string;
-  data_compra?: string; // YYYY-MM-DD
-  data_expiracao?: string; // YYYY-MM-DD
+  perda_garantia?: string; // Perda da garantia em caso de
+  cuidados_com_produto?: string; // Cuidados com o produto
+  data_compra?: string; // YYYY-MM-DD - Data da compra
+  data_expiracao?: string; // YYYY-MM-DD - Data final da garantia
 }
 
 export interface AtualizarGarantiaNovoDTO {
   produto_id?: number;
   local_id?: number;
   fornecedor_id?: number;
-  duracao?: string;
+  duracao?: string; // Tempo da garantia
   cobertura?: string;
   documentos?: string;
   descricao?: string;
-  perda_garantia?: string;
-  data_compra?: string;
-  data_expiracao?: string;
+  perda_garantia?: string; // Perda da garantia em caso de
+  cuidados_com_produto?: string; // Cuidados com o produto
+  data_compra?: string; // Data da compra
+  data_expiracao?: string; // Data final da garantia
 }
 
 // Tipos para Preventivos
