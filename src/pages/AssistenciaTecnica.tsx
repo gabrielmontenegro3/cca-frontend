@@ -4,6 +4,7 @@ import { chamadosService } from '../services/chamadosService'
 import { Chamado } from '../types'
 import { GaleriaImagens } from '../components/GaleriaImagens'
 import { ChatChamado } from '../components/ChatChamado'
+import { compressImages } from '../utils/imageCompression'
 
 // Componente de seleção de status com animação interativa
 interface StatusSelectorProps {
@@ -486,23 +487,28 @@ const AssistenciaTecnica = () => {
     setShowModalCriarChamado(false) // Fechar modal
   }
 
-  const handleAnexosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAnexosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
     const fileArray = Array.from(files)
     const validFiles: File[] = []
 
-    fileArray.forEach((file) => {
+    // Processar arquivos
+    for (const file of fileArray) {
       // Validar tamanho (10MB)
       if (file.size > 10 * 1024 * 1024) {
         alert(`O arquivo ${file.name} excede 10MB e será ignorado`)
-        return
+        continue
       }
-
       validFiles.push(file)
+    }
 
-      // Criar preview para imagens
+    // Comprimir imagens
+    const processedFiles = await compressImages(validFiles, 1, 1920)
+
+    // Criar previews
+    processedFiles.forEach((file) => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader()
         reader.onloadend = () => {
@@ -514,7 +520,7 @@ const AssistenciaTecnica = () => {
       }
     })
 
-    setAnexosForm(prev => [...prev, ...validFiles].slice(0, 10)) // Máximo 10 arquivos
+    setAnexosForm(prev => [...prev, ...processedFiles].slice(0, 10)) // Máximo 10 arquivos
   }
 
   const removerAnexo = (index: number) => {
