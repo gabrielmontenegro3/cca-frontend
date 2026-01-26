@@ -224,6 +224,10 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     if (item.id === 'preventivos' && usuario?.tipo === 'morador') {
       return false
     }
+    // Ocultar Governança técnica (Inspeção e Laudo) para usuários do tipo morador
+    if (item.id === 'inspecao-laudo' && usuario?.tipo === 'morador') {
+      return false
+    }
     return true
   })
 

@@ -41,7 +41,7 @@ type Page =
   | 'usuarios'
 
 function App() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, usuario } = useAuth()
   const [activePage, setActivePage] = useState<Page>('visao-geral')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -59,6 +59,15 @@ function App() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Redirecionar moradores que tentam acessar páginas restritas
+  useEffect(() => {
+    if (usuario?.tipo === 'morador') {
+      if (activePage === 'inspecao-laudo' || activePage === 'preventivos') {
+        setActivePage('visao-geral')
+      }
+    }
+  }, [usuario, activePage])
 
   // Função wrapper para converter Dispatch<SetStateAction<Page>> em (page: Page) => void
   const handleSetActivePage = (page: Page) => {
