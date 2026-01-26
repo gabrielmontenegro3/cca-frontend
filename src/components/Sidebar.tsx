@@ -218,10 +218,19 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
   ]
 
+  // Filtrar itens do menu baseado no tipo de usuário
+  const filteredMenuItems = menuItems.filter((item) => {
+    // Ocultar Preventivos para usuários do tipo morador
+    if (item.id === 'preventivos' && usuario?.tipo === 'morador') {
+      return false
+    }
+    return true
+  })
+
   // Adicionar item de Usuários apenas para administrador (tipo 4)
   // Este item aparece no final do menu, visível apenas para administradores
   if (hasPermission('gerenciar_usuarios')) {
-    menuItems.push({
+    filteredMenuItems.push({
       id: 'usuarios' as Page,
       label: 'Usuários',
       icon: (
@@ -261,7 +270,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
       {/* Menu de Navegação */}
       <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-1">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <li key={item.id}>
               <button
                 onClick={() => {
