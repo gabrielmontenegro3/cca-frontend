@@ -484,7 +484,7 @@ const orientacoesPorComodo: OrientacaoComodo[] = [
 const ManutencaoUso = () => {
   const [comodoExpandido, setComodoExpandido] = useState<string | null>(null)
   const [secaoExpandida, setSecaoExpandida] = useState<string | null>(null)
-  const { showToast, removeToast, toasts } = useToast()
+  const { removeToast, toasts } = useToast()
 
   const toggleComodo = (comodoId: string) => {
     setComodoExpandido(comodoExpandido === comodoId ? null : comodoId)
