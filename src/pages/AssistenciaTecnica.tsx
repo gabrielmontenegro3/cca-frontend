@@ -638,7 +638,7 @@ const AssistenciaTecnica = () => {
       {/* Layout Principal - Lista e Chat */}
       <div className={`flex flex-col ${chamadoSelecionadoChat && !isMobile ? 'lg:flex-row' : ''} gap-4 md:gap-6`}>
         <div className={`${chamadoSelecionadoChat && !isMobile ? 'lg:w-1/3' : 'w-full'}`}>
-          <div className="bg-gray-700 rounded-lg shadow-lg p-4 md:p-6 border border-gray-600">
+          <div>
             {/* Título e Botão Criar Chamado na mesma linha */}
             <div className="flex items-center justify-between mb-3 md:mb-4">
               <h3 className="text-lg md:text-xl font-semibold text-white">Chamados</h3>
@@ -662,7 +662,7 @@ const AssistenciaTecnica = () => {
                 </button>
               )}
             </div>
-            <div className={`space-y-2 md:space-y-3 ${chamadoSelecionadoChat ? 'max-h-[400px] md:max-h-[800px]' : 'max-h-[400px] md:max-h-[600px]'} overflow-y-auto custom-scrollbar`}>
+            <div className="space-y-2 md:space-y-3">
               {chamados.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400">Nenhum chamado registrado.</p>

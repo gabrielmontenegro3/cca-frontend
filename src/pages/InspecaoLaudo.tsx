@@ -277,7 +277,7 @@ const InspecaoLaudo = () => {
       <h1 className="text-3xl font-bold text-white mb-2">Governança técnica</h1>
       <p className="text-gray-400 mb-6">Gerenciamento de vistorias e laudos técnicos</p>
       
-      <div className="bg-gray-700 rounded-lg shadow-lg border border-gray-600 p-6">
+      <div>
         {/* Filtros e Ações */}
         <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex flex-col md:flex-row gap-4 flex-1">
@@ -334,7 +334,7 @@ const InspecaoLaudo = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="space-y-2">
             {laudos.map((laudo) => (
               <div
                 key={laudo.id}

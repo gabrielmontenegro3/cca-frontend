@@ -58,8 +58,11 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nomesUsuarios, setNomesUsuarios] = useState<Record<number, string>>({});
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevMensagensLengthRef = useRef<number>(0);
+  const prevLoadingRef = useRef<boolean>(true);
 
   const carregarChamado = async () => {
     try {
@@ -185,17 +188,21 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
     }
   };
 
-  // Scroll para última mensagem quando carregar ou quando mensagens mudarem
+  // Scroll para última mensagem apenas ao carregar o chat ou quando chegar mensagem nova (não ao renovar URLs/imagens)
   useEffect(() => {
-    if (!loading && chamado) {
-      // Usar setTimeout para garantir que o DOM foi renderizado completamente
+    const mensagensLength = chamado?.mensagens?.length ?? 0;
+    const acabouDeCarregar = prevLoadingRef.current && !loading;
+    const temNovaMensagem = mensagensLength > prevMensagensLengthRef.current;
+    prevLoadingRef.current = loading;
+    prevMensagensLengthRef.current = mensagensLength;
+
+    if (!loading && chamado && (acabouDeCarregar || temNovaMensagem)) {
       const timeoutId = setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       }, 150);
-      
       return () => clearTimeout(timeoutId);
     }
-  }, [chamado?.mensagens, loading, chamado]);
+  }, [chamado?.mensagens?.length, loading, chamado]);
 
   // Carregar chamados do usuário quando o modal for aberto
   useEffect(() => {
@@ -304,23 +311,29 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
 
   const formatarData = (data: string) => {
     const date = new Date(data);
-    const hoje = new Date();
-    const ontem = new Date(hoje);
-    ontem.setDate(ontem.getDate() - 1);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-    if (date.toDateString() === hoje.toDateString()) {
-      return `Hoje às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else if (date.toDateString() === ontem.toDateString()) {
-      return `Ontem às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-      return date.toLocaleString('pt-BR', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-    }
+  const getStatusBadge = () => {
+    const statusMap: Record<string, { label: string; className: string }> = {
+      resolvido: { label: 'RESOLVIDO', className: 'bg-emerald-500 text-white' },
+      aberto: { label: 'ABERTO', className: 'bg-red-500/90 text-white' },
+      em_andamento: { label: 'EM ANDAMENTO', className: 'bg-amber-500/90 text-white' },
+      cancelado: { label: 'CANCELADO', className: 'bg-gray-500 text-white' }
+    };
+    const s = statusMap[chamado?.status || ''] || { label: String(chamado?.status || '').toUpperCase(), className: 'bg-gray-500 text-white' };
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.className}`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-white/90" />
+        {s.label}
+      </span>
+    );
   };
 
   const isMinhaMensagem = (mensagem: MensagemChamado) => {
@@ -356,33 +369,58 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-800 rounded-lg border border-gray-600">
+    <div className="flex flex-col h-full bg-gray-900 rounded-xl border border-white/10 shadow-xl">
       {/* Header do Chat */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-600 bg-gray-700 rounded-t-lg">
-        <div 
-          className="flex-1 cursor-pointer hover:bg-gray-600 rounded-lg p-2 -m-2 transition-colors"
-          onClick={() => setShowUsuarioModal(true)}
-          title="Clique para ver informações do usuário"
-        >
-          <h3 className="text-lg font-semibold text-white">{chamado.titulo}</h3>
-          <p className="text-sm text-gray-400">
-            Status: <span className="font-medium text-gray-300">{chamado.status}</span>
-            {chamado.usuario_dados && (
-              <> • <span className="text-gray-300">{chamado.usuario_dados.nome}</span></>
-            )}
-          </p>
-        </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
-            title="Fechar chat"
+      <div className="flex items-start justify-between p-4 pb-3 border-b border-white/10">
+        <div className="flex-1 min-w-0">
+          <div 
+            className="cursor-pointer group"
+            onClick={() => setShowUsuarioModal(true)}
+            title="Clique para ver informações do usuário"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-xl font-bold text-white truncate">{chamado.titulo}</h3>
+              {getStatusBadge()}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 ml-2">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowHeaderMenu(!showHeaderMenu)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              title="Mais opções"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+              </svg>
+            </button>
+            {showHeaderMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowHeaderMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 py-1 w-48 bg-gray-800 border border-white/10 rounded-lg shadow-xl z-20">
+                  <button
+                    type="button"
+                    onClick={() => { setShowUsuarioModal(true); setShowHeaderMenu(false); }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-200 hover:bg-white/10"
+                  >
+                    Informações do usuário
+                  </button>
+                  {onClose && (
+                    <button
+                      type="button"
+                      onClick={() => { onClose(); setShowHeaderMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-200 hover:bg-white/10"
+                    >
+                      Fechar chat
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Modal de Informações do Usuário */}
@@ -530,86 +568,81 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
         </div>
       )}
 
-      {/* Área de Mensagens */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+      {/* Área de Mensagens - estilo referência */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0 bg-gray-900">
         {chamado.mensagens && chamado.mensagens.length > 0 ? (
           chamado.mensagens.map((mensagem) => {
-            // Verificar se é uma mensagem de mudança de status (evento do sistema)
             const isEventoSistema = mensagem.mensagem && mensagem.mensagem.startsWith('Status alterado');
-            
             if (isEventoSistema) {
-              // Exibir como evento do sistema (centralizado, estilo diferente)
               return (
-                <div
-                  key={mensagem.id}
-                  className="flex justify-center"
-                >
-                  <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg px-4 py-2 max-w-[80%]">
+                <div key={mensagem.id} className="flex justify-center">
+                  <div className="bg-amber-900/30 border border-amber-700/50 rounded-xl px-4 py-2 max-w-[85%]">
                     <div className="flex items-center gap-2 justify-center mb-1">
-                      <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-xs font-semibold text-yellow-400">Sistema</span>
-                      <span className="text-xs text-yellow-500/70">
-                        {formatarData(mensagem.created_at)}
-                      </span>
+                      <span className="text-xs font-semibold text-amber-400">Sistema</span>
+                      <span className="text-xs text-amber-500/70">{formatarData(mensagem.created_at)}</span>
                     </div>
-                    <p className="text-sm text-yellow-300 text-center whitespace-pre-wrap break-words">
-                      {mensagem.mensagem}
-                    </p>
+                    <p className="text-sm text-amber-200 text-center whitespace-pre-wrap break-words">{mensagem.mensagem}</p>
                   </div>
                 </div>
               );
             }
-            
-            // Mensagem normal do chat
             const minhaMensagem = isMinhaMensagem(mensagem);
+            const nomeRemetente = mensagem.autor_dados?.nome || nomesUsuarios[mensagem.autor_id] || `Usuário ${mensagem.autor_id}`;
+            const dataHora = formatarData(mensagem.created_at);
             return (
               <div
                 key={mensagem.id}
                 className={`flex ${minhaMensagem ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[70%] rounded-lg p-3 ${
-                    minhaMensagem
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold">
-                      {minhaMensagem 
-                        ? 'Você' 
-                        : mensagem.autor_dados?.nome || nomesUsuarios[mensagem.autor_id] || `Usuário ${mensagem.autor_id}`}
-                    </span>
-                    <span className={`text-sm ${minhaMensagem ? 'text-blue-100' : 'text-gray-400'}`}>
-                      {formatarData(mensagem.created_at)}
-                    </span>
+                <div className={`max-w-[75%] flex flex-col ${minhaMensagem ? 'items-end' : 'items-start'}`}>
+                  {/* Nome e data: esquerda = nome + data acima; direita = data à esquerda, Você à direita */}
+                  <div className={`flex items-center gap-2 mb-1.5 w-full ${minhaMensagem ? 'justify-end' : 'justify-start'}`}>
+                    {minhaMensagem ? (
+                      <>
+                        <span className="text-xs text-gray-500">{dataHora}</span>
+                        <span className="text-sm font-medium text-gray-400">Você</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm font-semibold text-white">{nomeRemetente}</span>
+                        <span className="text-xs text-gray-500">{dataHora}</span>
+                      </>
+                    )}
                   </div>
-                  
-                  {mensagem.mensagem && (
-                    <p className="text-sm whitespace-pre-wrap break-words">{mensagem.mensagem}</p>
-                  )}
-                  
-                  {mensagem.anexos && mensagem.anexos.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {mensagem.anexos.map((anexo) => (
-                        <AnexoImagem
-                          key={anexo.id}
-                          anexo={anexo}
-                          onRenovarUrls={renovarUrls}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  <div
+                    className={`rounded-2xl px-4 py-3 w-full ${
+                      minhaMensagem
+                        ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-tr-md'
+                        : 'bg-gray-700/90 text-gray-100 rounded-tl-md'
+                    }`}
+                  >
+                    {mensagem.mensagem && (
+                      <p className="text-sm whitespace-pre-wrap break-words">{mensagem.mensagem}</p>
+                    )}
+                    {mensagem.anexos && mensagem.anexos.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {mensagem.anexos.map((anexo) => (
+                          <AnexoImagem
+                            key={anexo.id}
+                            anexo={anexo}
+                            onRenovarUrls={renovarUrls}
+                            variant="chat"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="text-center py-8 text-gray-400">
-            <p>
-              {podeEnviarMensagem() 
+          <div className="text-center py-12 text-gray-500">
+            <p className="text-sm">
+              {podeEnviarMensagem()
                 ? 'Nenhuma mensagem ainda. Inicie a conversa!'
                 : 'Nenhuma mensagem neste chamado.'}
             </p>
@@ -620,21 +653,21 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
 
       {/* Preview de Anexos */}
       {anexos.length > 0 && (
-        <div className="px-4 py-2 border-t border-gray-600 bg-gray-700">
+        <div className="px-4 py-2 border-t border-white/10 bg-gray-800/50">
           <div className="flex flex-wrap gap-2">
             {anexos.map((arquivo, index) => (
               <div
                 key={index}
-                className="relative bg-gray-800 rounded-lg p-2 border border-gray-600"
+                className="relative bg-gray-700/80 rounded-xl p-2 border border-white/10"
               >
                 {anexosPreview[index] ? (
                   <img
                     src={anexosPreview[index]}
                     alt="Preview"
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-16 h-16 object-cover rounded-lg"
                   />
                 ) : (
-                  <div className="w-16 h-16 flex items-center justify-center bg-gray-700 rounded">
+                  <div className="w-16 h-16 flex items-center justify-center bg-gray-600/50 rounded-lg">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
@@ -643,7 +676,7 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
                 <button
                   type="button"
                   onClick={() => removerAnexo(index)}
-                  className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-700"
+                  className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
                 >
                   ×
                 </button>
@@ -654,16 +687,16 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
         </div>
       )}
 
-      {/* Input de Mensagem */}
-      <div className="p-4 border-t border-gray-600 bg-gray-700 rounded-b-lg">
+      {/* Input de Mensagem - estilo referência */}
+      <div className="p-4 border-t border-white/10 bg-gray-900 rounded-b-xl">
         {!podeEnviarMensagem() ? (
-          <div className="bg-gray-800 border border-gray-600 rounded-lg p-3">
+          <div className="bg-gray-800/80 border border-white/10 rounded-xl p-3">
             <div className="flex items-center gap-2 text-gray-400">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm">
-                {usuario?.tipo === 'construtora' 
+                {usuario?.tipo === 'construtora'
                   ? 'Você tem permissão apenas para visualizar este chat. Não é possível enviar mensagens.'
                   : 'Você não tem permissão para enviar mensagens neste chamado.'}
               </p>
@@ -671,17 +704,17 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
           </div>
         ) : (
           <>
-            <div className="flex gap-2">
+            <div className="flex items-end gap-2">
               <button
+                type="button"
                 onClick={() => setShowSeletorAnexo(true)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors cursor-pointer"
+                className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-700 hover:bg-gray-600 text-white transition-colors"
                 title="Anexar arquivo"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8h-16" />
                 </svg>
               </button>
-              
               <textarea
                 value={novaMensagem}
                 onChange={(e) => setNovaMensagem(e.target.value)}
@@ -691,22 +724,38 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
                     handleEnviar();
                   }
                 }}
-                placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-                rows={2}
-                className="flex-1 bg-gray-800 text-white placeholder-gray-400 px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+                placeholder="Escreva sua mensagem..."
+                rows={1}
+                className="flex-1 min-h-[44px] max-h-32 bg-gray-700/90 text-white placeholder-gray-500 px-4 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 resize-none text-sm"
               />
-              
               <button
+                type="button"
                 onClick={handleEnviar}
                 disabled={enviando || (!novaMensagem.trim() && anexos.length === 0)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium text-sm hover:from-blue-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                {enviando ? 'Enviando...' : 'Enviar'}
+                <span>{enviando ? 'Enviando...' : 'Enviar'}</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-              Máximo 10 arquivos, 10MB cada. Formatos: imagens e PDF
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-gray-500">PDF, JPG, PNG até 10MB</p>
+              <div className="flex items-center gap-1">
+                <button type="button" className="p-1.5 text-gray-500 hover:text-gray-400 rounded" title="Configurações">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 2.31.501 2.31 1.066 0 1.724-1.174 2.166-2.54 2.166-1.366 0-2.54-.442-2.54-2.166 0-.565.767-2.006 2.31-1.066 1.171.715 2.573.69 2.573-1.066 0-1.756-2.924-1.756-3.35 0a1.724 1.724 0 01-2.573-1.066c-.94 1.543-2.31.501-2.31-1.066 0-1.724 1.174-2.166 2.54-2.166 1.366 0 2.54.442 2.54 2.166 0 .565-.767 2.006-2.31 1.066-1.171-.715-2.573-.69-2.573 1.066z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+                <button type="button" className="p-1.5 text-gray-500 hover:text-gray-400 rounded" title="Ações">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>
