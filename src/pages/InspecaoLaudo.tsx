@@ -32,7 +32,7 @@ const InspecaoLaudo = () => {
   const [showModalCriar, setShowModalCriar] = useState(false);
   const [showModalVisualizar, setShowModalVisualizar] = useState(false);
   const [laudoVisualizar, setLaudoVisualizar] = useState<Laudo | null>(null);
-  const [loadingLaudo, setLoadingLaudo] = useState(false);
+  const [loadingLaudo, _setLoadingLaudo] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',
     chamado_id: ''
@@ -235,19 +235,7 @@ const InspecaoLaudo = () => {
     return hasPermission('deletar');
   };
 
-  const handleVisualizarLaudo = async (laudo: Laudo) => {
-    try {
-      setLoadingLaudo(true);
-      const laudoCompleto = await vistoriaLaudoService.buscarPorId(laudo.id);
-      setLaudoVisualizar(laudoCompleto);
-      setShowModalVisualizar(true);
-    } catch (err: any) {
-      alert(`Erro ao carregar detalhes do laudo: ${err.message || 'Erro desconhecido'}`);
-      console.error('Erro ao carregar laudo:', err);
-    } finally {
-      setLoadingLaudo(false);
-    }
-  };
+
 
   const handleNovoLaudo = () => {
     setFormData({ titulo: '', chamado_id: '' });
