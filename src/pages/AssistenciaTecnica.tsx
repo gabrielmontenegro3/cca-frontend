@@ -66,16 +66,16 @@ const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, get
       onClick={(e) => e.stopPropagation()}
     >
       {/* Badge do status atual */}
-      <div className="relative z-10 flex-shrink-0">
+      <div className="relative z-[100] flex-shrink-0">
         <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${getStatusColor(status)}`}>
           {getStatusLabel(status)}
         </span>
       </div>
 
-      {/* Painel de seleção com animação - abre para a esquerda */}
+      {/* Painel de seleção com animação - abre para a esquerda (z-index alto para sobrepor menu lateral em telas pequenas) */}
       <div
         className={`
-          absolute right-full top-0 z-20
+          absolute right-full top-0 z-[100]
           flex items-center gap-3
           bg-gray-800 border border-gray-600 rounded-lg
           shadow-2xl
@@ -210,16 +210,16 @@ const StatusFilterSelector = ({ filtroStatus, onFiltroChange, getStatusColor, ge
       onMouseLeave={handleMouseLeave}
     >
       {/* Badge do filtro atual */}
-      <div className="relative z-10 flex-shrink-0">
+      <div className="relative z-[100] flex-shrink-0">
         <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${currentColor}`}>
           {currentLabel}
         </span>
       </div>
 
-      {/* Painel de seleção com animação - abre para a direita */}
+      {/* Painel de seleção com animação - abre para a direita (z-index alto para sobrepor menu lateral em telas pequenas) */}
       <div
         className={`
-          absolute left-full top-0 z-20
+          absolute left-full top-0 z-[100]
           flex items-center gap-3
           bg-gray-800 border border-gray-600 rounded-lg
           shadow-2xl
@@ -491,12 +491,20 @@ const AssistenciaTecnica = () => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    const fileArray = Array.from(files)
-    const validFiles: File[] = []
+    // Ao abrir chamado: apenas 1 foto (imagem). O bloco de anexos só aparece em novo chamado.
+    const isNovoChamado = !editingChamado
+    let fileArray = Array.from(files)
+    if (isNovoChamado) {
+      fileArray = fileArray.slice(0, 1)
+      if (fileArray.length > 0 && !fileArray[0].type.startsWith('image/')) {
+        alert('Para abrir um chamado é permitido apenas uma foto (imagem).')
+        e.target.value = ''
+        return
+      }
+    }
 
-    // Processar arquivos
+    const validFiles: File[] = []
     for (const file of fileArray) {
-      // Validar tamanho (10MB)
       if (file.size > 10 * 1024 * 1024) {
         alert(`O arquivo ${file.name} excede 10MB e será ignorado`)
         continue
@@ -504,23 +512,30 @@ const AssistenciaTecnica = () => {
       validFiles.push(file)
     }
 
-    // Comprimir imagens
     const processedFiles = await compressImages(validFiles, 1, 1920)
+    const finalFiles = isNovoChamado ? processedFiles : [...anexosForm, ...processedFiles].slice(0, 10)
 
-    // Criar previews
-    processedFiles.forEach((file) => {
-      if (file.type.startsWith('image/')) {
+    if (isNovoChamado) {
+      setAnexosForm(finalFiles)
+      if (processedFiles[0]?.type.startsWith('image/')) {
         const reader = new FileReader()
-        reader.onloadend = () => {
-          setAnexosPreview(prev => [...prev, reader.result as string])
-        }
-        reader.readAsDataURL(file)
+        reader.onloadend = () => setAnexosPreview([reader.result as string])
+        reader.readAsDataURL(processedFiles[0])
       } else {
-        setAnexosPreview(prev => [...prev, ''])
+        setAnexosPreview([])
       }
-    })
-
-    setAnexosForm(prev => [...prev, ...processedFiles].slice(0, 10)) // Máximo 10 arquivos
+    } else {
+      processedFiles.forEach((file) => {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader()
+          reader.onloadend = () => setAnexosPreview(prev => [...prev, reader.result as string])
+          reader.readAsDataURL(file)
+        } else {
+          setAnexosPreview(prev => [...prev, ''])
+        }
+      })
+      setAnexosForm(finalFiles)
+    }
   }
 
   const removerAnexo = (index: number) => {
@@ -963,14 +978,13 @@ const AssistenciaTecnica = () => {
                 {!editingChamado && (
                   <div>
                     <label className="block text-sm md:text-base font-semibold text-gray-300 mb-2">
-                      Anexos (opcional, máximo 10 arquivos, 10MB cada)
+                      Foto (opcional, no máximo 1 imagem, 10MB)
                     </label>
                     <div className="space-y-2">
                       <input
                         id="chamado-anexos-input"
                         type="file"
-                        multiple
-                        accept="image/*,application/pdf"
+                        accept="image/*"
                         onChange={handleAnexosChange}
                         disabled={submitting}
                         className="
@@ -1020,7 +1034,7 @@ const AssistenciaTecnica = () => {
                         </div>
                       )}
                       <p className="text-xs text-gray-500 italic">
-                        Os anexos serão enviados com a mensagem inicial do chamado
+                        A foto será enviada com a mensagem inicial do chamado
                       </p>
                     </div>
                   </div>

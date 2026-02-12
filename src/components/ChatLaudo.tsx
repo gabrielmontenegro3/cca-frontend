@@ -22,6 +22,7 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nomesUsuarios, setNomesUsuarios] = useState<Record<number, string>>({});
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -209,23 +210,13 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
 
   const formatarData = (data: string) => {
     const date = new Date(data);
-    const hoje = new Date();
-    const ontem = new Date(hoje);
-    ontem.setDate(ontem.getDate() - 1);
-
-    if (date.toDateString() === hoje.toDateString()) {
-      return `Hoje às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else if (date.toDateString() === ontem.toDateString()) {
-      return `Ontem às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-      return date.toLocaleString('pt-BR', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-    }
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const isMinhaMensagem = (mensagem: MensagemLaudo) => {
@@ -262,36 +253,53 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-800 rounded-lg border border-gray-600">
-      {/* Header do Chat */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-600 bg-gray-700 rounded-t-lg">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-white">{laudo.titulo}</h3>
-          <p className="text-sm text-gray-400">
-            Chamado ID: <span className="font-medium text-gray-300">{laudo.chamado_id}</span>
-            {laudo.created_at && (
-              <> • Criado em {formatarData(laudo.created_at)}</>
-            )}
+    <div className="flex flex-col h-full bg-gray-900 rounded-xl border border-white/10 shadow-xl">
+      {/* Header do Chat - mesmo estilo da Assistência Técnica */}
+      <div className="flex items-start justify-between p-4 pb-3 border-b border-white/10">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xl font-bold text-white truncate">{laudo.titulo}</h3>
+          <p className="text-sm text-gray-400 mt-0.5">
+            Chamado #{laudo.chamado_id}
+            {laudo.created_at && ` • ${formatarData(laudo.created_at)}`}
           </p>
         </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
-            title="Fechar chat"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
+        <div className="flex items-center gap-1 ml-2">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowHeaderMenu(!showHeaderMenu)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              title="Mais opções"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+              </svg>
+            </button>
+            {showHeaderMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowHeaderMenu(false)} />
+                <div className="absolute right-0 top-full mt-1 py-1 w-48 bg-gray-800 border border-white/10 rounded-lg shadow-xl z-20">
+                  {onClose && (
+                    <button
+                      type="button"
+                      onClick={() => { onClose(); setShowHeaderMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-200 hover:bg-white/10"
+                    >
+                      Fechar chat
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Área de Mensagens */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-        {/* Arquivos diretos do laudo (sem mensagem) - DESTACADOS - Aparecem primeiro */}
+      {/* Área de Mensagens - mesmo estilo da Assistência Técnica */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0 bg-gray-900">
+        {/* Arquivos iniciais do laudo */}
         {laudo.arquivos && laudo.arquivos.length > 0 && (
-          <div className="mb-6 pb-6 border-b-2 border-gray-600">
+          <div className="mb-6 pb-6 border-b border-white/10">
             <div className="flex items-center gap-2 mb-3">
               <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -306,24 +314,10 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
                   tipo: arquivo.file_type
                 };
                 return (
-                  <div
-                    key={arquivo.id}
-                    className="relative rounded-lg"
-                  >
+                  <div key={arquivo.id} className="relative rounded-xl overflow-hidden">
                     <AnexoImagem
                       anexo={anexo}
-                      onRenovarUrls={async () => {
-                        // Renovar URLs dos arquivos
-                        if (!arquivo.url) {
-                          try {
-                            const novaUrl = await vistoriaLaudoService.obterUrlDownload(arquivo.id);
-                            arquivo.url = novaUrl;
-                          } catch (err) {
-                            console.error('Erro ao obter URL:', err);
-                          }
-                        }
-                        await renovarUrls();
-                      }}
+                      onRenovarUrls={renovarUrls}
                     />
                   </div>
                 );
@@ -335,107 +329,96 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
         {laudo.mensagens && laudo.mensagens.length > 0 ? (
           laudo.mensagens.map((mensagem, index) => {
             const minhaMensagem = isMinhaMensagem(mensagem);
+            const nomeRemetente = nomesUsuarios[mensagem.usuario_id] || `Usuário ${mensagem.usuario_id}`;
+            const dataHora = formatarData(mensagem.created_at);
             const isPrimeiraMensagem = index === 0;
             return (
               <div
                 key={mensagem.id}
                 className={`flex ${minhaMensagem ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[70%] rounded-lg p-3 ${
-                    isPrimeiraMensagem
-                      ? minhaMensagem
-                        ? 'bg-blue-600 text-white border border-gray-600 shadow-lg'
-                        : 'bg-gray-700 text-gray-100 border border-gray-600 shadow-lg'
-                      : minhaMensagem
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-100'
-                  }`}
-                >
-                  {isPrimeiraMensagem && (
-                    <div className="flex items-center gap-1 mb-2 pb-2 border-b border-gray-600">
-                      <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-xs font-semibold text-gray-400">Primeira Mensagem</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold">
-                      {minhaMensagem 
-                        ? 'Você' 
-                        : nomesUsuarios[mensagem.usuario_id] || `Usuário ${mensagem.usuario_id}`}
-                    </span>
-                    <span className={`text-sm ${minhaMensagem ? 'text-blue-100' : 'text-gray-400'}`}>
-                      {formatarData(mensagem.created_at)}
-                    </span>
+                <div className={`max-w-[75%] flex flex-col ${minhaMensagem ? 'items-end' : 'items-start'}`}>
+                  <div className={`flex items-center gap-2 mb-1.5 w-full ${minhaMensagem ? 'justify-end' : 'justify-start'}`}>
+                    {minhaMensagem ? (
+                      <>
+                        <span className="text-xs text-gray-500">{dataHora}</span>
+                        <span className="text-sm font-medium text-gray-400">Você</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm font-semibold text-white">{nomeRemetente}</span>
+                        <span className="text-xs text-gray-500">{dataHora}</span>
+                      </>
+                    )}
                   </div>
-                  
-                  {mensagem.mensagem && (
-                    <p className="text-sm whitespace-pre-wrap break-words">{mensagem.mensagem}</p>
-                  )}
-                  
-                  {mensagem.arquivos && mensagem.arquivos.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {mensagem.arquivos.map((arquivo) => {
-                        // Converter ArquivoLaudo para formato AnexoImagem
-                        // Se não tiver URL, obter do serviço
-                        const anexo = {
-                          id: parseInt(arquivo.id.replace(/-/g, '').substring(0, 10)) || 0,
-                          url: arquivo.url || '',
-                          tipo: arquivo.file_type
-                        };
-                        return (
-                          <AnexoImagem
-                            key={arquivo.id}
-                            anexo={anexo}
-                            onRenovarUrls={async () => {
-                              // Renovar URLs dos arquivos
-                              if (!arquivo.url) {
-                                try {
-                                  const novaUrl = await vistoriaLaudoService.obterUrlDownload(arquivo.id);
-                                  arquivo.url = novaUrl;
-                                } catch (err) {
-                                  console.error('Erro ao obter URL:', err);
-                                }
-                              }
-                              await renovarUrls();
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
+                  <div
+                    className={`rounded-2xl px-4 py-3 w-full ${
+                      minhaMensagem
+                        ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-tr-md'
+                        : 'bg-gray-700/90 text-gray-100 rounded-tl-md'
+                    }`}
+                  >
+                    {isPrimeiraMensagem && (
+                      <div className="flex items-center gap-1 mb-2 pb-2 border-b border-white/10">
+                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-xs font-semibold text-gray-400">Primeira Mensagem</span>
+                      </div>
+                    )}
+                    {mensagem.mensagem?.trim() && (
+                      <p className="text-sm whitespace-pre-wrap break-words">{mensagem.mensagem}</p>
+                    )}
+                    {mensagem.arquivos && mensagem.arquivos.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {mensagem.arquivos.map((arquivo) => {
+                          const anexo = {
+                            id: parseInt(arquivo.id.replace(/-/g, '').substring(0, 10)) || 0,
+                            url: arquivo.url || '',
+                            tipo: arquivo.file_type
+                          };
+                          return (
+                            <AnexoImagem
+                              key={arquivo.id}
+                              anexo={anexo}
+                              onRenovarUrls={renovarUrls}
+                              variant="chat"
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="text-center py-8 text-gray-400">
-            <p>Nenhuma mensagem ainda. Inicie a conversa!</p>
+          <div className="text-center py-12 text-gray-500">
+            <p className="text-sm">Nenhuma mensagem ainda. Inicie a conversa!</p>
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Preview de Anexos */}
+      {/* Preview de Anexos - mesmo estilo da Assistência */}
       {anexos.length > 0 && (
-        <div className="px-4 py-2 border-t border-gray-600 bg-gray-700">
+        <div className="px-4 py-2 border-t border-white/10 bg-gray-800/50">
           <div className="flex flex-wrap gap-2">
             {anexos.map((arquivo, index) => (
               <div
                 key={index}
-                className="relative bg-gray-800 rounded-lg p-2 border border-gray-600"
+                className="relative bg-gray-700/80 rounded-xl p-2 border border-white/10"
               >
                 {anexosPreview[index] ? (
                   <img
                     src={anexosPreview[index]}
                     alt="Preview"
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-16 h-16 object-cover rounded-lg"
                   />
                 ) : (
-                  <div className="w-16 h-16 flex items-center justify-center bg-gray-700 rounded">
+                  <div className="w-16 h-16 flex items-center justify-center bg-gray-600/50 rounded-lg">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
@@ -444,7 +427,7 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
                 <button
                   type="button"
                   onClick={() => removerAnexo(index)}
-                  className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-700"
+                  className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
                 >
                   ×
                 </button>
@@ -455,10 +438,55 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
         </div>
       )}
 
-      {/* Input de Mensagem */}
-      <div className="p-4 border-t border-gray-600 bg-gray-700 rounded-b-lg space-y-3">
-        {/* Botão para upload de arquivo direto ao laudo */}
-        <div className="flex items-center gap-2">
+      {/* Input de Mensagem - mesmo estilo da Assistência Técnica */}
+      <div className="p-4 border-t border-white/10 bg-gray-900 rounded-b-xl">
+        <div className="flex items-end gap-2">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+            title="Anexar arquivo à mensagem"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8h-16" />
+            </svg>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            accept="image/*,application/pdf"
+            className="hidden"
+            id="chat-laudo-file-input"
+          />
+          <textarea
+            value={novaMensagem}
+            onChange={(e) => setNovaMensagem(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleEnviar();
+              }
+            }}
+            placeholder="Escreva sua mensagem..."
+            rows={1}
+            className="flex-1 min-h-[44px] max-h-32 bg-gray-700/90 text-white placeholder-gray-500 px-4 py-3 rounded-2xl border border-white/10 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 resize-none text-sm"
+          />
+          <button
+            type="button"
+            onClick={handleEnviar}
+            disabled={enviando || (!novaMensagem.trim() && anexos.length === 0)}
+            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium text-sm hover:from-blue-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          >
+            <span>{enviando ? 'Enviando...' : 'Enviar'}</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-gray-500">PDF, JPG, PNG até 10MB</p>
           <input
             type="file"
             multiple
@@ -470,58 +498,12 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
           />
           <label
             htmlFor="laudo-file-input"
-            className="px-3 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Anexar arquivo ao laudo"
+            className="text-xs text-gray-500 hover:text-gray-400 cursor-pointer"
+            title="Anexar arquivo ao laudo (sem mensagem)"
           >
-            📎 Anexar ao Laudo
+            Anexar ao laudo
           </label>
         </div>
-
-        <div className="flex gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            accept="image/*,application/pdf"
-            className="hidden"
-            id="chat-file-input"
-          />
-          <label
-            htmlFor="chat-file-input"
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors cursor-pointer"
-            title="Anexar arquivo"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-            </svg>
-          </label>
-          
-          <textarea
-            value={novaMensagem}
-            onChange={(e) => setNovaMensagem(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleEnviar();
-              }
-            }}
-            placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            rows={2}
-            className="flex-1 bg-gray-800 text-white placeholder-gray-400 px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-          />
-          
-          <button
-            onClick={handleEnviar}
-            disabled={enviando || (!novaMensagem.trim() && anexos.length === 0)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {enviando ? 'Enviando...' : 'Enviar'}
-          </button>
-        </div>
-        <p className="text-xs text-gray-400">
-          Máximo 10 arquivos, 10MB cada. Formatos: imagens e PDF
-        </p>
       </div>
     </div>
   );

@@ -213,27 +213,27 @@ export const AnexoImagem: React.FC<AnexoImagemProps> = ({ anexo, onRenovarUrls, 
       );
     }
     return (
-      <div className="flex items-center gap-4 p-4 bg-gray-700/50 border border-gray-600 rounded-lg hover:bg-gray-700/70 transition-colors w-full">
+      <div className="flex items-center gap-3 p-4 bg-gray-700/50 border border-gray-600 rounded-lg hover:bg-gray-700/70 transition-colors w-full">
         <div className="flex-shrink-0">
           <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
           </svg>
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
           <p className="text-sm font-medium text-white truncate" title={nomeArquivo}>
             {nomeArquivo}
           </p>
           <p className="text-xs text-gray-400 mt-0.5">Documento PDF</p>
         </div>
         <button
+          type="button"
           onClick={handleDownload}
-          className="flex-shrink-0 px-5 py-2.5 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors flex items-center gap-2"
+          className="flex-shrink-0 p-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors"
           title="Baixar PDF"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-          <span className="text-sm font-medium">Download</span>
         </button>
       </div>
     );

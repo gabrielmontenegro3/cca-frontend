@@ -16,7 +16,18 @@ const InspecaoLaudo = () => {
   const [laudoSelecionado, setLaudoSelecionado] = useState<string | null>(null);
   const [chatRefreshKey, setChatRefreshKey] = useState(0);
   const [filtroChamado, setFiltroChamado] = useState<number | ''>('');
-  
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar se é mobile (mesmo critério da Assistência Técnica)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint do Tailwind
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Modal de criação
   const [showModalCriar, setShowModalCriar] = useState(false);
   const [showModalVisualizar, setShowModalVisualizar] = useState(false);
@@ -272,96 +283,112 @@ const InspecaoLaudo = () => {
     );
   }
 
+  const handleFecharChat = () => {
+    setLaudoSelecionado(null);
+    carregarDados();
+  };
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-white mb-2">Governança técnica</h1>
-      <p className="text-gray-400 mb-6">Gerenciamento de vistorias e laudos técnicos</p>
-      
-      <div>
-        {/* Filtros e Ações */}
-        <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          <div className="flex flex-col md:flex-row gap-4 flex-1">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Filtrar por Chamado
-              </label>
-              <select
-                value={filtroChamado}
-                onChange={(e) => setFiltroChamado(e.target.value ? Number(e.target.value) : '')}
-                className="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Todos os chamados</option>
-                {chamados.map((chamado) => (
-                  <option key={chamado.id} value={chamado.id}>
-                    #{chamado.id} - {chamado.titulo}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          
-          {podeCriarLaudo() && (
-            <button
-              onClick={handleNovoLaudo}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg font-medium flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Novo Laudo
-            </button>
-          )}
+    <div className="pb-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Governança técnica</h1>
+      <p className="text-sm md:text-base text-gray-400 mb-4 md:mb-6">Gerenciamento de vistorias e laudos técnicos</p>
+
+      {error && (
+        <div className="mb-4 md:mb-6 p-4 bg-red-900/20 border border-red-700 rounded-lg">
+          <p className="text-red-400">Erro: {error}</p>
+          <button
+            onClick={carregarDados}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+          >
+            Tentar novamente
+          </button>
         </div>
+      )}
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-900/20 border border-red-700 rounded-lg">
-            <p className="text-red-400">Erro: {error}</p>
-            <button
-              onClick={carregarDados}
-              className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+      {/* Layout Principal - Lista e Chat (mesmo layout da Assistência Técnica) */}
+      <div className={`flex flex-col ${laudoSelecionado && !isMobile ? 'lg:flex-row' : ''} gap-4 md:gap-6`}>
+        {/* Coluna da lista de laudos */}
+        <div className={`${laudoSelecionado && !isMobile ? 'lg:w-1/3' : 'w-full'}`}>
+          {/* Filtro */}
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">
+              Filtrar por Chamado
+            </label>
+            <select
+              value={filtroChamado}
+              onChange={(e) => setFiltroChamado(e.target.value ? Number(e.target.value) : '')}
+              className="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500"
             >
-              Tentar novamente
-            </button>
+              <option value="">Todos os chamados</option>
+              {chamados.map((chamado) => (
+                <option key={chamado.id} value={chamado.id}>
+                  #{chamado.id} - {chamado.titulo}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
 
-        {/* Lista de Laudos */}
-        {laudos.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <p className="text-lg mb-2">Nenhum laudo encontrado</p>
-            {podeCriarLaudo() && (
-              <p className="text-sm">Clique em "Novo Laudo" para criar o primeiro laudo</p>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {laudos.map((laudo) => (
-              <div
-                key={laudo.id}
-                onClick={() => handleVisualizarLaudo(laudo)}
-                className="bg-gray-800 border border-gray-600 rounded-lg p-4 transition-all hover:bg-gray-750 hover:border-blue-500 cursor-pointer group"
+          {/* Botão Novo Laudo */}
+          {podeCriarLaudo() && (
+            <div className="mb-6">
+              <button
+                onClick={handleNovoLaudo}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg font-medium flex items-center justify-center gap-2"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors truncate mb-2">
-                      {laudo.titulo}
-                    </h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span>
-                        Chamado: <span className="text-gray-300">#{laudo.chamado_id}</span>
-                      </span>
-                      <span>•</span>
-                      <span>{formatarData(laudo.created_at)}</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Novo Laudo
+              </button>
+            </div>
+          )}
+
+          {/* Lista de Laudos */}
+          {laudos.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <p>Nenhum laudo encontrado.</p>
+              {podeCriarLaudo() && (
+                <p className="text-sm mt-1">Clique em &quot;Novo Laudo&quot; para criar o primeiro.</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {laudos.map((laudo) => (
+                <div
+                  key={laudo.id}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest('button')) return;
+                    setLaudoSelecionado(laudo.id);
+                    setChatRefreshKey((k) => k + 1);
+                  }}
+                  className={`bg-gray-800 border border-gray-600 rounded-lg p-4 transition-colors ${
+                    laudoSelecionado === laudo.id ? 'border-blue-500 bg-gray-750' : 'hover:bg-gray-750 hover:border-blue-500'
+                  } cursor-pointer`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-white text-base mb-1.5 truncate">
+                        {laudo.titulo}
+                      </h4>
+                      <div className="text-sm text-gray-400">
+                        <span className="text-blue-400">Chamado: #{laudo.chamado_id}</span>
+                        {laudo.created_at && (
+                          <>
+                            <span className="text-gray-500 mx-1.5">•</span>
+                            <span>{formatarData(laudo.created_at)}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                     {podeDeletarLaudo() && (
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeletarLaudo(laudo.id);
                         }}
-                        className="p-2 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:text-gray-300 hover:bg-gray-700 rounded-lg transition-colors ml-2 flex-shrink-0"
                         title="Excluir laudo"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,8 +398,57 @@ const InspecaoLaudo = () => {
                     )}
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Chat do Laudo - Desktop (ao lado da lista) */}
+        {laudoSelecionado && !isMobile && (
+          <div className="lg:w-2/3">
+            <div className="bg-gray-700 rounded-lg shadow-lg p-3 md:p-6 border border-gray-600 h-[calc(100vh-12rem)] md:h-[800px]">
+              <ChatLaudo
+                laudoId={laudoSelecionado}
+                refreshKey={chatRefreshKey}
+                onSelecionarLaudo={(novoLaudoId) => {
+                  setLaudoSelecionado(novoLaudoId);
+                  setChatRefreshKey((k) => k + 1);
+                }}
+                onClose={handleFecharChat}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Chat do Laudo - Mobile (tela cheia) */}
+        {laudoSelecionado && isMobile && (
+          <div className="fixed inset-0 z-50 bg-gray-900 lg:hidden">
+            <div className="h-full flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800">
+                <h2 className="text-lg font-semibold text-white">Chat</h2>
+                <button
+                  type="button"
+                  onClick={handleFecharChat}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                  aria-label="Fechar chat"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-            ))}
+              <div className="flex-1 overflow-hidden bg-gray-800">
+                <ChatLaudo
+                  laudoId={laudoSelecionado}
+                  refreshKey={chatRefreshKey}
+                  onSelecionarLaudo={(novoLaudoId) => {
+                    setLaudoSelecionado(novoLaudoId);
+                    setChatRefreshKey((k) => k + 1);
+                  }}
+                  onClose={undefined}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -705,40 +781,6 @@ const InspecaoLaudo = () => {
         </div>
       )}
 
-      {/* Chat do Laudo Selecionado */}
-      {laudoSelecionado && (
-        <div className="mt-6 bg-gray-700 rounded-lg shadow-lg border border-gray-600 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">Chat do Laudo</h2>
-            <button
-              onClick={() => {
-                setLaudoSelecionado(null);
-                carregarDados();
-              }}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
-              title="Fechar chat"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="h-[600px]">
-            <ChatLaudo 
-              laudoId={laudoSelecionado}
-              refreshKey={chatRefreshKey}
-              onSelecionarLaudo={(novoLaudoId) => {
-                setLaudoSelecionado(novoLaudoId);
-                setChatRefreshKey(prev => prev + 1);
-              }}
-              onClose={() => {
-                setLaudoSelecionado(null);
-                carregarDados();
-              }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
