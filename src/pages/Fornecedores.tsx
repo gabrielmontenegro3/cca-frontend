@@ -80,7 +80,7 @@ const Fornecedores = ({ setActivePage }: FornecedoresProps) => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Fornecedores</h1>
+          <h1 className="text-3xl font-bold text-white">Responsável técnico</h1>
           <p className="text-gray-400 text-sm mt-1">Listagem de fornecedores do sistema</p>
         </div>
       </div>

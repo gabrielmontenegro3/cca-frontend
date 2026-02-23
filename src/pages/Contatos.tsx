@@ -252,7 +252,7 @@ const Contatos = () => {
   return (
     <div>
       {/* Título */}
-      <h1 className="text-3xl font-bold text-white mb-2">Contatos</h1>
+      <h1 className="text-3xl font-bold text-white mb-2">Apoio ao processo</h1>
       <p className="text-gray-400 mb-6">Contatos de emergência e utilidade pública</p>
       
       {/* Lista de Contatos */}

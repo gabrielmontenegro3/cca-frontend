@@ -504,7 +504,7 @@ const ManutencaoUso = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Manutenção e Uso</h1>
+          <h1 className="text-3xl font-bold text-white">Condição para validade</h1>
           <p className="text-gray-400 text-sm mt-1">Orientações para preservação dos materiais do apartamento</p>
         </div>
       </div>

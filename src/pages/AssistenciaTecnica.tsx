@@ -610,7 +610,7 @@ const AssistenciaTecnica = () => {
   if (loading) {
     return (
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Assistência Técnica</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Ponto crítico</h1>
         <p className="text-gray-400 mb-6">Gerencie os chamados técnicos do sistema</p>
         <div className="bg-gray-700 p-6 rounded-lg shadow-lg text-center">
           <p className="text-gray-300">Carregando dados...</p>
@@ -622,7 +622,7 @@ const AssistenciaTecnica = () => {
   return (
     <div className="pb-6">
       {/* Título */}
-      <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Assistência Técnica</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Ponto crítico</h1>
       <p className="text-sm md:text-base text-gray-400 mb-4 md:mb-6">Gerencie os chamados técnicos do sistema</p>
       
       {error && (

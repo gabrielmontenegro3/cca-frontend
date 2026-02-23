@@ -17,8 +17,8 @@ const Empreendimento = () => {
   const descricaoCompleta = "O Residencial Jade é um empreendimento realizado pela Demo para que você tenha o máximo de praticidade e conforto. Seus apartamentos foram planejados de modo a oferecer excelente qualidade de vida aos seus moradores."
   
   const dadosTecnicos = {
-    proponente: "Predialize S.A.",
-    construtora: "Predialize S.A.",
+    proponente: "CCA",
+    construtora: "CCA",
     empreendimento: "Residencial Jade",
     endereco: "Rua Arcanjo Cândido da Silva, 123 - Praia de Fora, Palhoça - SC.",
     areaTerreno: "2.500 m²",
@@ -124,7 +124,7 @@ const Empreendimento = () => {
     <div className="space-y-6">
       {/* Título */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Empreendimento</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Ativo sob garantia</h1>
         <p className="text-gray-400 mb-6">Informações do empreendimento</p>
       </div>
 

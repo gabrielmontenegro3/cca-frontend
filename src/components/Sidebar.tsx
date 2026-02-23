@@ -50,7 +50,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
   const menuItems = [
     { 
       id: 'visao-geral' as Page, 
-      label: 'Visão Geral', 
+      label: 'Status geral da garantia', 
       icon: (
         <Icon isActive={activePage === 'visao-geral'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'empreendimento' as Page, 
-      label: 'Empreendimento', 
+      label: 'Ativo sob garantia', 
       icon: (
         <Icon isActive={activePage === 'empreendimento'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'garantias' as Page, 
-      label: 'Garantias', 
+      label: 'Prazos e escopos', 
       icon: (
         <Icon isActive={activePage === 'garantias'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'preventivos' as Page, 
-      label: 'Preventivos', 
+      label: 'Mitigação de perda de garantia', 
       icon: (
         <Icon isActive={activePage === 'preventivos'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +95,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'manutencao-uso' as Page, 
-      label: 'Manutenção e Uso', 
+      label: 'Condição para validade', 
       icon: (
         <Icon isActive={activePage === 'manutencao-uso'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +106,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'inspecao-laudo' as Page, 
-      label: 'Governança técnica', 
+      label: 'Análise de enquadramento', 
       icon: (
         <Icon isActive={activePage === 'inspecao-laudo'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'locais' as Page, 
-      label: 'Locais', 
+      label: 'Subsistemas afetados', 
       icon: (
         <Icon isActive={activePage === 'locais'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'produtos' as Page, 
-      label: 'Produtos', 
+      label: 'Sistema aplicado', 
       icon: (
         <Icon isActive={activePage === 'produtos'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'fornecedores' as Page, 
-      label: 'Fornecedores', 
+      label: 'Responsável técnico', 
       icon: (
         <Icon isActive={activePage === 'fornecedores'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'contatos' as Page, 
-      label: 'Contatos', 
+      label: 'Apoio ao processo', 
       icon: (
         <Icon isActive={activePage === 'contatos'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +162,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'documentos' as Page, 
-      label: 'Documentos', 
+      label: 'Base de verificação', 
       icon: (
         <Icon isActive={activePage === 'documentos'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +173,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'perguntas-frequentes' as Page, 
-      label: 'Perguntas Frequentes', 
+      label: 'Orientação de uso', 
       icon: (
         <Icon isActive={activePage === 'perguntas-frequentes'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'sobre-nos' as Page, 
-      label: 'Sobre nós', 
+      label: 'Institucional', 
       icon: (
         <Icon isActive={activePage === 'sobre-nos'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +195,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'boletim-informativo' as Page, 
-      label: 'Boletim Informativo', 
+      label: 'Educação do usuário', 
       icon: (
         <Icon isActive={activePage === 'boletim-informativo'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     },
     { 
       id: 'assistencia-tecnica' as Page, 
-      label: 'Assistência Técnica', 
+      label: 'Ponto crítico', 
       icon: (
         <Icon isActive={activePage === 'assistencia-tecnica'}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +224,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
     if (item.id === 'preventivos' && usuario?.tipo === 'morador') {
       return false
     }
-    // Ocultar Governança técnica (Inspeção e Laudo) para usuários do tipo morador
+    // Ocultar Análise de enquadramento (Inspeção e Laudo) para usuários do tipo morador
     if (item.id === 'inspecao-laudo' && usuario?.tipo === 'morador') {
       return false
     }

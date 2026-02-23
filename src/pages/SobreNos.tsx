@@ -9,7 +9,7 @@ const SobreNos = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Sobre nós</h1>
+          <h1 className="text-3xl font-bold text-white">Institucional</h1>
           <p className="text-gray-400 text-sm mt-1">Conheça mais sobre o CCA e nossa missão</p>
         </div>
       </div>
@@ -51,7 +51,7 @@ const SobreNos = () => {
             </p>
           </div>
 
-          {/* Nossos Valores */}
+          {/* Visão e Valores da CCA */}
           <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/50">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
@@ -59,25 +59,51 @@ const SobreNos = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-white">Nossos Valores</h3>
+              <h3 className="text-xl font-semibold text-white">Visão e Valores da CCA</h3>
             </div>
-            <ul className="space-y-3">
-              {[
-                { icon: 'M9 12l2 2 4-4', text: 'Transparência nas informações', color: 'text-blue-400' },
-                { icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4', text: 'Facilidade de uso', color: 'text-green-400' },
-                { icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z', text: 'Atendimento de qualidade', color: 'text-purple-400' },
-                { icon: 'M13 10V3L4 14h7v7l9-11h-7z', text: 'Inovação constante', color: 'text-orange-400' }
-              ].map((valor, index) => (
-                <li key={index} className="flex items-center gap-3 text-gray-300">
-                  <div className={`w-8 h-8 bg-gray-700/50 rounded-lg flex items-center justify-center border border-gray-600`}>
-                    <svg className={`w-4 h-4 ${valor.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={valor.icon} />
-                    </svg>
-                  </div>
-                  <span>{valor.text}</span>
-                </li>
-              ))}
-            </ul>
+
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                  <span>🎯</span> Visão
+                </h4>
+                <p className="text-gray-300 leading-relaxed">
+                  Ser referência na aplicação da Engenharia Diagnóstica e da Engenharia de Materiais para a análise, prescrição e governança técnica do desempenho de sistemas e subsistemas construtivos, contribuindo para a tomada de decisão qualificada ao longo do ciclo de vida do ativo construído.
+                </p>
+              </div>
+
+              <div className="border-t border-gray-600/50 pt-6">
+                <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <span>🧭</span> Valores
+                </h4>
+                <ul className="space-y-4">
+                  <li className="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+                    <p className="font-semibold text-white mb-1">Rigor Técnico</p>
+                    <p className="text-gray-300 text-sm">Atuação fundamentada em ciência, método e análise diagnóstica.</p>
+                  </li>
+                  <li className="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+                    <p className="font-semibold text-white mb-1">Rastreabilidade da Informação</p>
+                    <p className="text-gray-300 text-sm">Estruturação técnica dos registros de campo para apoio à decisão.</p>
+                  </li>
+                  <li className="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+                    <p className="font-semibold text-white mb-1">Desempenho Construtivo</p>
+                    <p className="text-gray-300 text-sm">Foco na durabilidade, funcionalidade e adequação dos sistemas.</p>
+                  </li>
+                  <li className="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+                    <p className="font-semibold text-white mb-1">Prescrição Responsável</p>
+                    <p className="text-gray-300 text-sm">Especificação de materiais conforme condições de exposição e particularidades regionais.</p>
+                  </li>
+                  <li className="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+                    <p className="font-semibold text-white mb-1">Gestão de Riscos Técnicos</p>
+                    <p className="text-gray-300 text-sm">Apoio ao enquadramento de responsabilidades e à validade das garantias.</p>
+                  </li>
+                  <li className="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+                    <p className="font-semibold text-white mb-1">Independência Técnica</p>
+                    <p className="text-gray-300 text-sm">Atuação orientada por diagnóstico, prognóstico e metodologia.</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           {/* Contato */}

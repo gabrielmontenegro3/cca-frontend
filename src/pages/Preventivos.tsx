@@ -129,7 +129,7 @@ const Preventivos = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Preventivos</h1>
+          <h1 className="text-3xl font-bold text-white">Mitigação de perda de garantia</h1>
           <p className="text-gray-400 text-sm mt-1">Manutenções preventivas das áreas comuns do condomínio</p>
         </div>
       </div>

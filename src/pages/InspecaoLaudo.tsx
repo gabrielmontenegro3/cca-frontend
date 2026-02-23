@@ -256,7 +256,7 @@ const InspecaoLaudo = () => {
   if (usuario?.tipo === 'morador') {
     return (
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Governança técnica</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Análise de enquadramento</h1>
         <p className="text-gray-400 mb-6">Gerenciamento de vistorias e laudos técnicos</p>
         <div className="bg-red-900/50 border border-red-700 rounded-lg shadow-lg p-8 text-center">
           <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,7 +278,7 @@ const InspecaoLaudo = () => {
 
   return (
     <div className="pb-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Governança técnica</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Análise de enquadramento</h1>
       <p className="text-sm md:text-base text-gray-400 mb-4 md:mb-6">Gerenciamento de vistorias e laudos técnicos</p>
 
       {error && (

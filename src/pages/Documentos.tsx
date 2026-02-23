@@ -106,7 +106,7 @@ const Documentos = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Documentos</h1>
+          <h1 className="text-3xl font-bold text-white">Base de verificação</h1>
           <p className="text-gray-400 text-sm mt-1">Acesse e baixe todos os documentos relacionados ao seu imóvel</p>
         </div>
       </div>

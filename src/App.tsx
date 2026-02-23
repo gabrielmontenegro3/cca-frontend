@@ -144,7 +144,7 @@ function App() {
       }`}>
         {renderContent()}
       </main>
-      <Chatbot />
+      <Chatbot activePage={activePage} />
     </div>
   )
 }

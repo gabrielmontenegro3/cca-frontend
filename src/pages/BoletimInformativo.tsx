@@ -68,7 +68,7 @@ const BoletimInformativo = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Boletim Informativo</h1>
+          <h1 className="text-3xl font-bold text-white">Educação do usuário</h1>
           <p className="text-gray-400 text-sm mt-1">Fique por dentro das últimas notícias e atualizações</p>
         </div>
       </div>

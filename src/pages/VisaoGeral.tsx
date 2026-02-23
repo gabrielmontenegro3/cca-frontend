@@ -51,6 +51,7 @@ const VisaoGeral = () => {
 
   return (
     <div className="min-h-screen pb-0">
+      <h1 className="text-3xl font-bold text-white mb-6">Status geral da garantia</h1>
       {/* Hero: imagem de fundo + tag + título */}
       <div className="relative rounded-xl overflow-hidden mb-8">
         <div className="absolute inset-0">

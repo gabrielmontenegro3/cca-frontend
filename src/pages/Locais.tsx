@@ -75,7 +75,7 @@ const Locais = ({ setActivePage }: LocaisProps) => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Locais</h1>
+          <h1 className="text-3xl font-bold text-white">Subsistemas afetados</h1>
           <p className="text-gray-400 text-sm mt-1">Listagem de locais do sistema</p>
         </div>
       </div>

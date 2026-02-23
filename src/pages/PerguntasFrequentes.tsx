@@ -71,7 +71,7 @@ const PerguntasFrequentes = () => {
           </svg>
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white">Perguntas Frequentes</h1>
+          <h1 className="text-3xl font-bold text-white">Orientação de uso</h1>
           <p className="text-gray-400 text-sm mt-1">Encontre respostas para as dúvidas mais comuns</p>
         </div>
       </div>

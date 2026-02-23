@@ -12,9 +12,11 @@ interface ChatChamadoProps {
   onClose?: () => void;
   refreshKey?: number; // Chave para forçar recarregamento
   onSelecionarChamado?: (chamadoId: number) => void; // Callback para selecionar outro chamado
+  /** Quando true, o chat está dentro do painel flutuante e não deve alterar isChatOpen (evita esconder o botão) */
+  embedInFloatingPanel?: boolean;
 }
 
-export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, refreshKey, onSelecionarChamado }) => {
+export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, refreshKey, onSelecionarChamado, embedInFloatingPanel }) => {
   const { usuario } = useAuth();
   const { setIsChatOpen } = useChat();
   const [chamado, setChamado] = useState<Chamado | null>(null);
@@ -158,12 +160,16 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
   useEffect(() => {
     if (chamadoId) {
       carregarChamado();
-      setIsChatOpen(true);
+      if (!embedInFloatingPanel) {
+        setIsChatOpen(true);
+      }
     }
     return () => {
-      setIsChatOpen(false);
+      if (!embedInFloatingPanel) {
+        setIsChatOpen(false);
+      }
     };
-  }, [chamadoId, refreshKey, setIsChatOpen]);
+  }, [chamadoId, refreshKey, setIsChatOpen, embedInFloatingPanel]);
 
   // Renovação automática de URLs a cada 6 dias (antes de expirar em 7 dias)
   useEffect(() => {
