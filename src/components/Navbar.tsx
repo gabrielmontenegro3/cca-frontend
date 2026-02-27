@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext'
+import UsuarioDisplay from './UsuarioDisplay'
 
 interface NavbarProps {
   onMenuClick?: () => void
@@ -7,16 +8,6 @@ interface NavbarProps {
 
 const Navbar = ({ onMenuClick, isMobile = false }: NavbarProps) => {
   const { usuario, logout } = useAuth()
-
-  const getTipoLabel = (tipo: string) => {
-    const labels: Record<string, string> = {
-      'construtora': 'Construtora',
-      'gestão tecnica': 'Gestão Técnica',
-      'morador': 'Morador',
-      'administrador': 'Administrador'
-    }
-    return labels[tipo] || tipo
-  }
 
   return (
     <nav className={`bg-gray-900 border-b border-gray-800 fixed top-0 z-30 h-16 transition-all duration-300 ${
@@ -35,14 +26,9 @@ const Navbar = ({ onMenuClick, isMobile = false }: NavbarProps) => {
             </svg>
           </button>
         )}
-        <div className="flex items-center space-x-4 ml-auto">
-          {/* Informações do Usuário e Logout */}
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <p className="text-white text-sm font-medium">{usuario?.nome}</p>
-              <p className="text-gray-400 text-xs">{usuario ? getTipoLabel(usuario.tipo) : ''}</p>
-            </div>
-            <button
+        <div className="flex items-center gap-3 ml-auto">
+          <UsuarioDisplay usuario={usuario} compact />
+          <button
               onClick={logout}
               className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
               title="Sair"
@@ -61,7 +47,6 @@ const Navbar = ({ onMenuClick, isMobile = false }: NavbarProps) => {
                 />
               </svg>
             </button>
-          </div>
         </div>
       </div>
     </nav>
