@@ -17,7 +17,7 @@ const SobreNos = () => {
       {/* Conteúdo Principal */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 shadow-xl">
         <div className="space-y-8">
-          {/* Nossa História */}
+          {/* Quem é a CCA */}
           <div className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/50">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-indigo-600/20 rounded-lg flex items-center justify-center border border-indigo-500/30">
@@ -25,13 +25,22 @@ const SobreNos = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-white">Nossa História</h3>
+              <h3 className="text-xl font-semibold text-white">Quem é a CCA</h3>
             </div>
-            <p className="text-gray-300 leading-relaxed">
-              O CCA é um sistema desenvolvido para facilitar o gerenciamento e acompanhamento 
-              de informações relacionadas ao seu imóvel. Nosso objetivo é proporcionar uma 
-              experiência completa e transparente para os proprietários.
-            </p>
+            <div className="space-y-4 text-gray-300 leading-relaxed">
+              <p>
+                A CCA é uma empresa especializada na estruturação técnica da informação produzida ao longo do ciclo de vida do ativo construído. Há 8 anos no mercado, atua na inspeção e reabilitação de sistemas e subsistemas construtivos em empreendimentos prediais e industriais, com foco no desempenho técnico, na rastreabilidade das condições construtivas e na verificação de responsabilidades ao longo do tempo.
+              </p>
+              <p>
+                Sua atuação é orientada pelos princípios da Engenharia Diagnóstica, que integra ciência, pesquisa e metodologia aplicada para a análise do comportamento dos sistemas construtivos, por meio de diagnóstico, prognóstico e enquadramento técnico das condições verificadas em campo. Complementarmente, a Engenharia de Materiais fundamenta a prescrição técnica dos insumos e soluções aplicáveis, tanto na execução quanto na reabilitação de anomalias, considerando as condições de exposição e as particularidades regionais do ambiente de implantação do ativo, especialmente em zonas litorâneas e ambientes industriais sujeitos a agentes de degradação físico-química.
+              </p>
+              <p>
+                Essa abordagem permite transformar registros técnicos em informação qualificada para análise, apoio à tomada de decisão e gestão de riscos associados ao desempenho do ativo ao longo do tempo.
+              </p>
+              <p>
+                A atuação da CCA está organizada em três gestões independentes e complementares: Gestão Multidisciplinar em Campo, Gestão da Garantia Predial e Governança Técnica do Ativo Construído, aplicadas conforme as fases de produção, verificação de desempenho em garantia e operação do empreendimento. Cada uma de suas gestões pode ser contratada de forma autônoma, de acordo com o estágio do ativo e a necessidade do contratante.
+              </p>
+            </div>
           </div>
 
           {/* Nossa Missão */}

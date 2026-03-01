@@ -221,10 +221,10 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
                 }`}
               >
                 {item.icon}
-                <span className="flex flex-col items-start text-left min-w-0">
+                <span className="flex flex-col items-start text-left min-w-0 uppercase">
                   <span className="font-medium text-sm leading-snug">{item.label}</span>
                   {item.subtitle && (
-                    <span className="text-xs opacity-80 mt-0.5">{item.subtitle}</span>
+                    <span className="text-[11px] font-bold text-gray-500 mt-0.5">{item.subtitle}</span>
                   )}
                 </span>
               </button>
@@ -234,7 +234,7 @@ const Sidebar = ({ activePage, setActivePage, isOpen = true, onClose, isMobile =
       </nav>
 
       {/* Perfil no Rodapé */}
-      <div className="p-4 border-t border-gray-700/80">
+      <div className="p-4 border-t border-gray-700/80 uppercase">
         <UsuarioDisplay usuario={usuario} />
       </div>
     </aside>
