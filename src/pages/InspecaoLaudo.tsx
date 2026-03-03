@@ -403,6 +403,7 @@ const InspecaoLaudo = () => {
                   setChatRefreshKey((k) => k + 1);
                 }}
                 onClose={handleFecharChat}
+                onMensagemEnviada={carregarDados}
               />
             </div>
           </div>
@@ -434,6 +435,7 @@ const InspecaoLaudo = () => {
                     setChatRefreshKey((k) => k + 1);
                   }}
                   onClose={undefined}
+                  onMensagemEnviada={carregarDados}
                 />
               </div>
             </div>

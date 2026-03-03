@@ -60,19 +60,19 @@ const StatusSelector = ({ status, chamadoId, onStatusChange, getStatusColor, get
   return (
     <div
       ref={containerRef}
-      className="relative inline-flex items-center"
+      className={`relative inline-flex items-center ${isHovered ? 'z-[100]' : ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Badge do status atual */}
-      <div className="relative z-[100] flex-shrink-0">
+      {/* Badge do status atual - sem z-index para não sobrepor outros elementos */}
+      <div className="relative flex-shrink-0">
         <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${getStatusColor(status)}`}>
           {getStatusLabel(status)}
         </span>
       </div>
 
-      {/* Painel de seleção com animação - abre para a esquerda (z-index alto para sobrepor menu lateral em telas pequenas) */}
+      {/* Painel de seleção - z-index alto só quando aberto, para sobrepor ao abrir */}
       <div
         className={`
           absolute right-full top-0 z-[100]
@@ -205,18 +205,18 @@ const StatusFilterSelector = ({ filtroStatus, onFiltroChange, getStatusColor, ge
   return (
     <div
       ref={containerRef}
-      className="relative inline-flex items-center"
+      className={`relative inline-flex items-center ${isHovered ? 'z-[100]' : ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Badge do filtro atual */}
-      <div className="relative z-[100] flex-shrink-0">
+      {/* Badge do filtro atual - sem z-index para não sobrepor outros elementos */}
+      <div className="relative flex-shrink-0">
         <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${currentColor}`}>
           {currentLabel}
         </span>
       </div>
 
-      {/* Painel de seleção com animação - abre para a direita (z-index alto para sobrepor menu lateral em telas pequenas) */}
+      {/* Painel de seleção - z-index alto só quando aberto */}
       <div
         className={`
           absolute left-full top-0 z-[100]
@@ -321,57 +321,53 @@ const AssistenciaTecnica = () => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        setLoading(true)
-        
-        // Preparar filtros
-        const filtros: any = {}
-        
-        // Filtrar por status se houver
-        if (filtroStatus) {
-          filtros.status = filtroStatus as any
-        }
-        
-        // Construtora e Gestão Técnica podem ver todos os chamados
-        // Outros usuários (morador) veem apenas seus próprios chamados
-        if (usuarioLogado) {
-          const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase()
-          const podeVerTodos = tipoNormalizado === 'construtora' || tipoNormalizado === 'gestão tecnica' || tipoNormalizado === 'gestao tecnica'
-          
-          if (!podeVerTodos) {
-            filtros.usuario = usuarioLogado.id
-          }
-        }
-        
-        // Se não houver filtros, passar undefined para listar todos
-        const filtrosParaEnviar = Object.keys(filtros).length > 0 ? filtros : undefined
-        const chamadosData = await chamadosService.listar(filtrosParaEnviar)
-        
-        // Ordenar por data de criação (mais recentes primeiro)
-        const chamadosOrdenados = chamadosData.sort((a, b) => {
-          const dataA = a.created_at || a.data_criacao || ''
-          const dataB = b.created_at || b.data_criacao || ''
-          if (!dataA && !dataB) return 0
-          if (!dataA) return 1
-          if (!dataB) return -1
-          return new Date(dataB).getTime() - new Date(dataA).getTime()
-        })
-        
-        setChamados(chamadosOrdenados)
-        
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
-        console.error('Erro ao carregar dados:', err)
-      } finally {
-        setLoading(false)
+  const carregarDados = async (silent = false) => {
+    try {
+      if (!silent) setLoading(true)
+      const filtros: any = {}
+      if (filtroStatus) {
+        filtros.status = filtroStatus as any
       }
+      if (usuarioLogado) {
+        const tipoNormalizado = String(usuarioLogado.tipo).trim().toLowerCase()
+        const podeVerTodos = tipoNormalizado === 'construtora' || tipoNormalizado === 'gestão tecnica' || tipoNormalizado === 'gestao tecnica'
+        if (!podeVerTodos) {
+          filtros.usuario = usuarioLogado.id
+        }
+      }
+      const filtrosParaEnviar = Object.keys(filtros).length > 0 ? filtros : undefined
+      const chamadosData = await chamadosService.listar(filtrosParaEnviar)
+      const chamadosOrdenados = chamadosData.sort((a, b) => {
+        const dataA = a.created_at || a.data_criacao || ''
+        const dataB = b.created_at || b.data_criacao || ''
+        if (!dataA && !dataB) return 0
+        if (!dataA) return 1
+        if (!dataB) return -1
+        return new Date(dataB).getTime() - new Date(dataA).getTime()
+      })
+      setChamados(chamadosOrdenados)
+      setError(null)
+    } catch (err) {
+      if (!silent) {
+        setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
+      }
+      console.error('Erro ao carregar dados:', err)
+    } finally {
+      if (!silent) setLoading(false)
     }
+  }
 
+  useEffect(() => {
     carregarDados()
   }, [filtroStatus, hasPermission, usuarioLogado])
+
+  // Polling: atualizar lista de chamados a cada 5s (novos itens, mudança de status, etc.) sem recarregar a página
+  useEffect(() => {
+    const interval = setInterval(() => {
+      carregarDados(true)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [filtroStatus, usuarioLogado])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -427,7 +423,7 @@ const AssistenciaTecnica = () => {
           descricao: formData.descricao || undefined
         })
         
-        setChamados(chamados.map(c => c.id === editingChamado.id ? chamadoAtualizado : c))
+        setChamados(prev => prev.map(c => c.id === editingChamado.id ? chamadoAtualizado : c))
         setEditingChamado(null)
         alert('Chamado atualizado com sucesso!')
       } else {
@@ -442,7 +438,7 @@ const AssistenciaTecnica = () => {
           anexos: anexosParaEnviar.length > 0 ? anexosParaEnviar : undefined
         })
         
-        setChamados([novoChamado, ...chamados])
+        setChamados(prev => [novoChamado, ...prev])
         alert('Chamado criado com sucesso!')
         
         // Abrir chat do chamado criado
@@ -555,7 +551,7 @@ const AssistenciaTecnica = () => {
       
       // Atualizar o status
       const chamadoAtualizado = await chamadosService.atualizarStatus(id, novoStatus as any)
-      setChamados(chamados.map(c => c.id === id ? chamadoAtualizado : c))
+      setChamados(prev => prev.map(c => c.id === id ? { ...c, ...chamadoAtualizado } : c))
       
       // Se o usuário for Gestão Técnica, registrar a mudança no chat
       if (usuarioLogado) {
@@ -599,7 +595,7 @@ const AssistenciaTecnica = () => {
 
     try {
       await chamadosService.deletar(id)
-      setChamados(chamados.filter(c => c.id !== id))
+      setChamados(prev => prev.filter(c => c.id !== id))
       alert('Chamado deletado com sucesso!')
     } catch (err) {
       alert('Erro ao deletar chamado')

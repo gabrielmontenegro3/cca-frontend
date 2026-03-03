@@ -62,14 +62,18 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
   const [nomesUsuarios, setNomesUsuarios] = useState<Record<number, string>>({});
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevMensagensLengthRef = useRef<number>(0);
   const prevLoadingRef = useRef<boolean>(true);
+  const prevChamadoIdRef = useRef<number | null>(null);
 
-  const carregarChamado = async () => {
+  const carregarChamado = async (silent = false) => {
     try {
-      setLoading(true);
-      setError(null);
+      if (!silent) {
+        setLoading(true);
+        setError(null);
+      }
       const dados = await chamadosService.buscarPorId(chamadoId);
       
       // Validar permissão de acesso ao chamado
@@ -150,19 +154,25 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar chat');
+      if (!silent) {
+        setError(err.message || 'Erro ao carregar chat');
+      }
       console.error('Erro ao carregar chamado:', err);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    if (chamadoId) {
-      carregarChamado();
-      if (!embedInFloatingPanel) {
-        setIsChatOpen(true);
-      }
+    if (!chamadoId) return;
+    const isNovoChamado = prevChamadoIdRef.current !== chamadoId;
+    prevChamadoIdRef.current = chamadoId;
+    // Novo chamado: carregar com loading. Apenas refresh (ex.: status): recarregar em silêncio para não piscar a tela
+    carregarChamado(!isNovoChamado);
+    if (!embedInFloatingPanel) {
+      setIsChatOpen(true);
     }
     return () => {
       if (!embedInFloatingPanel) {
@@ -170,6 +180,16 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
       }
     };
   }, [chamadoId, refreshKey, setIsChatOpen, embedInFloatingPanel]);
+
+  // Polling: buscar novas mensagens a cada 3s enquanto o chat estiver aberto (evita precisar atualizar a página)
+  const POLL_INTERVAL_MS = 3000;
+  useEffect(() => {
+    if (!chamadoId) return;
+    const interval = setInterval(() => {
+      carregarChamado(true);
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [chamadoId]);
 
   // Renovação automática de URLs a cada 6 dias (antes de expirar em 7 dias)
   useEffect(() => {
@@ -194,7 +214,7 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
     }
   };
 
-  // Scroll para última mensagem apenas ao carregar o chat ou quando chegar mensagem nova (não ao renovar URLs/imagens)
+  // Scroll para última mensagem apenas dentro do container do chat (evita rolar a página inteira)
   useEffect(() => {
     const mensagensLength = chamado?.mensagens?.length ?? 0;
     const acabouDeCarregar = prevLoadingRef.current && !loading;
@@ -204,7 +224,10 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
 
     if (!loading && chamado && (acabouDeCarregar || temNovaMensagem)) {
       const timeoutId = setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        const el = messagesContainerRef.current;
+        if (el) {
+          el.scrollTop = el.scrollHeight;
+        }
       }, 150);
       return () => clearTimeout(timeoutId);
     }
@@ -291,14 +314,20 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
         anexos: anexos && anexos.length > 0 ? anexos : undefined
       });
 
-      // Adicionar mensagem à lista local
+      // Atualização otimista: exibir a nova mensagem na hora (sem depender do refetch)
       if (chamado) {
+        const novaLista = [...(chamado.mensagens || []), mensagemEnviada];
         setChamado({
           ...chamado,
-          mensagens: [...(chamado.mensagens || []), mensagemEnviada],
+          mensagens: novaLista,
           updated_at: new Date().toISOString()
         });
       }
+
+      // Sincronizar com o servidor em seguida (dados completos, anexos, etc.)
+      setTimeout(() => {
+        carregarChamado(true);
+      }, 400);
 
       // Limpar formulário
       setNovaMensagem('');
@@ -575,7 +604,7 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
       )}
 
       {/* Área de Mensagens - estilo referência */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0 bg-gray-900">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0 bg-gray-900">
         {chamado.mensagens && chamado.mensagens.length > 0 ? (
           chamado.mensagens.map((mensagem) => {
             const isEventoSistema = mensagem.mensagem && mensagem.mensagem.startsWith('Status alterado');

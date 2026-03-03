@@ -10,9 +10,11 @@ interface ChatLaudoProps {
   onClose?: () => void;
   refreshKey?: number; // Chave para forçar recarregamento
   onSelecionarLaudo?: (laudoId: string) => void; // Callback para selecionar outro laudo
+  /** Chamado após enviar mensagem, para o pai atualizar a lista sem recarregar a página */
+  onMensagemEnviada?: () => void;
 }
 
-export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshKey }) => {
+export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshKey, onMensagemEnviada }) => {
   const { usuario } = useAuth();
   const [laudo, setLaudo] = useState<Laudo | null>(null);
   const [novaMensagem, setNovaMensagem] = useState('');
@@ -159,6 +161,7 @@ export const ChatLaudo: React.FC<ChatLaudoProps> = ({ laudoId, onClose, refreshK
 
       // Recarregar laudo para mostrar a nova mensagem
       await carregarLaudo();
+      onMensagemEnviada?.();
 
       // Limpar formulário
       setNovaMensagem('');
