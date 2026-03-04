@@ -388,7 +388,7 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
       <div className="p-4 bg-red-900/20 border border-red-700 rounded-lg">
         <p className="text-red-400">Erro: {error}</p>
         <button
-          onClick={carregarChamado}
+          onClick={() => carregarChamado()}
           className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
         >
           Tentar novamente
