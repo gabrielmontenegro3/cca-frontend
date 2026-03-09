@@ -191,19 +191,19 @@ export const ChatChamado: React.FC<ChatChamadoProps> = ({ chamadoId, onClose, re
     return () => clearInterval(interval);
   }, [chamadoId]);
 
-  // Renovação automática de URLs a cada 6 dias (antes de expirar em 7 dias)
+  // Ao refocar a aba: renovar dados do chamado para obter novas URLs assinadas (válidas por 1h)
   useEffect(() => {
     if (!chamadoId) return;
-
-    const interval = setInterval(() => {
-      carregarChamado();
-    }, 6 * 24 * 60 * 60 * 1000); // 6 dias
-
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        carregarChamado(true);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [chamadoId]);
 
-  // Função para renovar URLs quando necessário
+  // Função para renovar URLs quando necessário (GET /api/chamados/:id → novas URLs assinadas)
   const renovarUrls = async () => {
     try {
       const dados = await chamadosService.buscarPorId(chamadoId);

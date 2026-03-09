@@ -17,6 +17,12 @@ export const AnexoImagem: React.FC<AnexoImagemProps> = ({ anexo, onRenovarUrls, 
   const [renovando, setRenovando] = useState(false);
   const [imagemCarregada, setImagemCarregada] = useState(false);
 
+  // Sincronizar com anexo.url quando o pai atualizar (ex.: após GET /api/chamados/:id renovar URLs assinadas)
+  useEffect(() => {
+    setUrl(anexo.url);
+    setErro(false);
+  }, [anexo.url]);
+
   useEffect(() => {
     setImagemCarregada(false);
   }, [url]);
